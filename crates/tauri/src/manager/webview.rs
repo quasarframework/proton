@@ -180,17 +180,13 @@ impl<R: Runtime> WebviewManager<R> {
       current_window_label = serde_json::to_string(window_label)?,
       current_webview_label = serde_json::to_string(&label)?,
     ));
-    all_initialization_scripts.push(
-      self
-        .initialization_script(
-          app_manager,
-          &ipc_init.into_string(),
-          &pattern_init.into_string(),
-          is_init_global,
-          use_https_scheme,
-        )?
-        .to_string(),
-    );
+    all_initialization_scripts.push(self.initialization_script(
+      app_manager,
+      &ipc_init.into_string(),
+      &pattern_init.into_string(),
+      is_init_global,
+      use_https_scheme,
+    )?);
 
     for plugin_init_script in plugin_init_scripts {
       all_initialization_scripts.push(plugin_init_script.to_string());
@@ -315,7 +311,7 @@ impl<R: Runtime> WebviewManager<R> {
         .get::<crate::Scopes>()
         .asset_protocol
         .clone();
-      let protocol = crate::protocol::asset::get(asset_scope.clone(), window_origin.clone());
+      let protocol = crate::protocol::asset::get(asset_scope, window_origin.clone());
       pending.register_uri_scheme_protocol("asset", move |webview_id, request, responder| {
         protocol(webview_id, request, UriSchemeResponder(responder))
       });
