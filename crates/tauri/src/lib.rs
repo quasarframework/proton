@@ -837,6 +837,8 @@ pub trait Listener<R: Runtime>: sealed::ManagerBase<R> {
   ///   })
   ///   .invoke_handler(tauri::generate_handler![synchronize]);
   /// ```
+  /// # Panics
+  /// Will panic if `event` contains characters other than alphanumeric, `-`, `/`, `:` and `_`
   fn listen<F>(&self, event: impl Into<String>, handler: F) -> EventId
   where
     F: Fn(Event) + Send + 'static;
@@ -844,6 +846,8 @@ pub trait Listener<R: Runtime>: sealed::ManagerBase<R> {
   /// Listen to an event on this manager only once.
   ///
   /// See [`Self::listen`] for more information.
+  /// # Panics
+  /// Will panic if `event` contains characters other than alphanumeric, `-`, `/`, `:` and `_`
   fn once<F>(&self, event: impl Into<String>, handler: F) -> EventId
   where
     F: FnOnce(Event) + Send + 'static;
@@ -895,6 +899,8 @@ pub trait Listener<R: Runtime>: sealed::ManagerBase<R> {
   ///   })
   ///   .invoke_handler(tauri::generate_handler![synchronize]);
   /// ```
+  /// # Panics
+  /// Will panic if `event` contains characters other than alphanumeric, `-`, `/`, `:` and `_`
   fn listen_any<F>(&self, event: impl Into<String>, handler: F) -> EventId
   where
     F: Fn(Event) + Send + 'static,
@@ -907,6 +913,8 @@ pub trait Listener<R: Runtime>: sealed::ManagerBase<R> {
   /// Listens once to an emitted event to any [target](EventTarget) .
   ///
   /// See [`Self::listen_any`] for more information.
+  /// # Panics
+  /// Will panic if `event` contains characters other than alphanumeric, `-`, `/`, `:` and `_`
   fn once_any<F>(&self, event: impl Into<String>, handler: F) -> EventId
   where
     F: FnOnce(Event) + Send + 'static,
@@ -929,6 +937,8 @@ pub trait Emitter<R: Runtime>: sealed::ManagerBase<R> {
   ///   app.emit("synchronized", ());
   /// }
   /// ```
+  /// # Panics
+  /// Will panic if `event` contains characters other than alphanumeric, `-`, `/`, `:` and `_`
   fn emit<S: Serialize + Clone>(&self, event: &str, payload: S) -> Result<()> {
     self.manager().emit(event, payload)
   }
@@ -955,6 +965,8 @@ pub trait Emitter<R: Runtime>: sealed::ManagerBase<R> {
   ///   }
   /// }
   /// ```
+  /// # Panics
+  /// Will panic if `event` contains characters other than alphanumeric, `-`, `/`, `:` and `_`
   fn emit_to<I, S>(&self, target: I, event: &str, payload: S) -> Result<()>
   where
     I: Into<EventTarget>,
@@ -981,6 +993,8 @@ pub trait Emitter<R: Runtime>: sealed::ManagerBase<R> {
   ///   }
   /// }
   /// ```
+  /// # Panics
+  /// Will panic if `event` contains characters other than alphanumeric, `-`, `/`, `:` and `_`
   fn emit_filter<S, F>(&self, event: &str, payload: S, filter: F) -> Result<()>
   where
     S: Serialize + Clone,

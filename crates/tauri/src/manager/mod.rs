@@ -516,6 +516,8 @@ impl<R: Runtime> AppManager<R> {
     &self.package_info
   }
 
+  /// # Panics
+  /// Will panic if `event` contains characters other than alphanumeric, `-`, `/`, `:` and `_`
   pub fn listen<F: Fn(Event) + Send + 'static>(
     &self,
     event: String,
@@ -526,6 +528,8 @@ impl<R: Runtime> AppManager<R> {
     self.listeners().listen(event, target, handler)
   }
 
+  /// # Panics
+  /// Will panic if `event` contains characters other than alphanumeric, `-`, `/`, `:` and `_`
   pub fn once<F: FnOnce(Event) + Send + 'static>(
     &self,
     event: String,
@@ -544,6 +548,8 @@ impl<R: Runtime> AppManager<R> {
     feature = "tracing",
     tracing::instrument("app::emit", skip(self, payload))
   )]
+  /// # Panics
+  /// Will panic if `event` contains characters other than alphanumeric, `-`, `/`, `:` and `_`
   pub fn emit<S: Serialize + Clone>(&self, event: &str, payload: S) -> crate::Result<()> {
     assert_event_name_is_valid!(event);
 
@@ -569,6 +575,8 @@ impl<R: Runtime> AppManager<R> {
     feature = "tracing",
     tracing::instrument("app::emit::filter", skip(self, payload, filter))
   )]
+  /// # Panics
+  /// Will panic if `event` contains characters other than alphanumeric, `-`, `/`, `:` and `_`
   pub fn emit_filter<S, F>(&self, event: &str, payload: S, filter: F) -> crate::Result<()>
   where
     S: Serialize + Clone,
@@ -598,6 +606,8 @@ impl<R: Runtime> AppManager<R> {
     feature = "tracing",
     tracing::instrument("app::emit::to", skip(self, target, payload), fields(target))
   )]
+  /// # Panics
+  /// Will panic if `event` contains characters other than alphanumeric, `-`, `/`, `:` and `_`
   pub fn emit_to<I, S>(&self, target: I, event: &str, payload: S) -> crate::Result<()>
   where
     I: Into<EventTarget>,
