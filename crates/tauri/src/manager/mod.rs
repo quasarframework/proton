@@ -39,11 +39,13 @@ mod tray;
 pub mod webview;
 pub mod window;
 
-fn assert_event_name_is_valid(event: &str) {
-  assert!(
-    is_event_name_valid(event),
-    "Event name must include only alphanumeric characters, `-`, `/`, `:` and `_`."
-  );
+macro_rules! assert_event_name_is_valid {
+  {$event:expr} => {
+    assert!(
+      is_event_name_valid($event),
+      "Event name must include only alphanumeric characters, `-`, `/`, `:` and `_`."
+    );
+  }
 }
 
 #[derive(Default)]
@@ -520,7 +522,7 @@ impl<R: Runtime> AppManager<R> {
     target: EventTarget,
     handler: F,
   ) -> EventId {
-    assert_event_name_is_valid(&event);
+    assert_event_name_is_valid!(&event);
     self.listeners().listen(event, target, handler)
   }
 
@@ -530,7 +532,7 @@ impl<R: Runtime> AppManager<R> {
     target: EventTarget,
     handler: F,
   ) -> EventId {
-    assert_event_name_is_valid(&event);
+    assert_event_name_is_valid!(&event);
     self.listeners().once(event, target, handler)
   }
 
@@ -543,7 +545,7 @@ impl<R: Runtime> AppManager<R> {
     tracing::instrument("app::emit", skip(self, payload))
   )]
   pub fn emit<S: Serialize + Clone>(&self, event: &str, payload: S) -> crate::Result<()> {
-    assert_event_name_is_valid(event);
+    assert_event_name_is_valid!(event);
 
     #[cfg(feature = "tracing")]
     let _span = tracing::debug_span!("emit::run").entered();
@@ -572,7 +574,7 @@ impl<R: Runtime> AppManager<R> {
     S: Serialize + Clone,
     F: Fn(&EventTarget) -> bool,
   {
-    assert_event_name_is_valid(event);
+    assert_event_name_is_valid!(event);
 
     #[cfg(feature = "tracing")]
     let _span = tracing::debug_span!("emit::run").entered();
