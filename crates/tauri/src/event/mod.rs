@@ -16,13 +16,6 @@ pub fn is_event_name_valid(event: &str) -> bool {
     .all(|c| c.is_alphanumeric() || c == '-' || c == '/' || c == ':' || c == '_')
 }
 
-pub fn assert_event_name_is_valid(event: &str) {
-  assert!(
-    is_event_name_valid(event),
-    "Event name must include only alphanumeric characters, `-`, `/`, `:` and `_`."
-  );
-}
-
 /// Unique id of an event.
 pub type EventId = u32;
 

@@ -24,7 +24,7 @@ use crate::{
     AppHandle, ChannelInterceptor, GlobalWebviewEventListener, GlobalWindowEventListener,
     OnPageLoad,
   },
-  event::{assert_event_name_is_valid, Event, EventId, EventTarget, Listeners},
+  event::{is_event_name_valid, Event, EventId, EventTarget, Listeners},
   ipc::{Invoke, InvokeHandler, RuntimeAuthority},
   plugin::PluginStore,
   utils::{config::Config, PackageInfo},
@@ -38,6 +38,13 @@ mod menu;
 mod tray;
 pub mod webview;
 pub mod window;
+
+fn assert_event_name_is_valid(event: &str) {
+  assert!(
+    is_event_name_valid(event),
+    "Event name must include only alphanumeric characters, `-`, `/`, `:` and `_`."
+  );
+}
 
 #[derive(Default)]
 /// Spaced and quoted Content-Security-Policy hash values.
