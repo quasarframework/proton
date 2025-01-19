@@ -929,7 +929,9 @@ pub trait Emitter<R: Runtime>: sealed::ManagerBase<R> {
   ///   app.emit("synchronized", ());
   /// }
   /// ```
-  fn emit<S: Serialize + Clone>(&self, event: &str, payload: S) -> Result<()>;
+  fn emit<S: Serialize + Clone>(&self, event: &str, payload: S) -> Result<()> {
+    self.manager().emit(event, payload)
+  }
 
   /// Emits an event to all [targets](EventTarget) matching the given target.
   ///
@@ -956,7 +958,10 @@ pub trait Emitter<R: Runtime>: sealed::ManagerBase<R> {
   fn emit_to<I, S>(&self, target: I, event: &str, payload: S) -> Result<()>
   where
     I: Into<EventTarget>,
-    S: Serialize + Clone;
+    S: Serialize + Clone,
+  {
+    self.manager().emit_to(target, event, payload)
+  }
 
   /// Emits an event to all [targets](EventTarget) based on the given filter.
   ///
@@ -979,7 +984,10 @@ pub trait Emitter<R: Runtime>: sealed::ManagerBase<R> {
   fn emit_filter<S, F>(&self, event: &str, payload: S, filter: F) -> Result<()>
   where
     S: Serialize + Clone,
-    F: Fn(&EventTarget) -> bool;
+    F: Fn(&EventTarget) -> bool,
+  {
+    self.manager().emit_filter(event, payload, filter)
+  }
 }
 
 /// Prevent implementation details from leaking out of the [`Manager`] trait.
