@@ -940,6 +940,10 @@ pub trait Emitter<R: Runtime>: sealed::ManagerBase<R> {
   /// # Panics
   /// Will panic if `event` contains characters other than alphanumeric, `-`, `/`, `:` and `_`
   fn emit<S: Serialize + Clone>(&self, event: &str, payload: S) -> Result<()> {
+    assert!(
+      event::is_event_name_valid(event),
+      "Event name must include only alphanumeric characters, `-`, `/`, `:` and `_`."
+    );
     self.manager().emit(event, payload)
   }
 
@@ -972,6 +976,10 @@ pub trait Emitter<R: Runtime>: sealed::ManagerBase<R> {
     I: Into<EventTarget>,
     S: Serialize + Clone,
   {
+    assert!(
+      event::is_event_name_valid(event),
+      "Event name must include only alphanumeric characters, `-`, `/`, `:` and `_`."
+    );
     self.manager().emit_to(target, event, payload)
   }
 
@@ -1000,6 +1008,10 @@ pub trait Emitter<R: Runtime>: sealed::ManagerBase<R> {
     S: Serialize + Clone,
     F: Fn(&EventTarget) -> bool,
   {
+    assert!(
+      event::is_event_name_valid(event),
+      "Event name must include only alphanumeric characters, `-`, `/`, `:` and `_`."
+    );
     self.manager().emit_filter(event, payload, filter)
   }
 }
