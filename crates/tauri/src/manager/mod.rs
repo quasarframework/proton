@@ -19,18 +19,18 @@ use tauri_utils::{
   html::{SCRIPT_NONCE_TOKEN, STYLE_NONCE_TOKEN},
 };
 
+use crate::resources::ResourceTable;
 use crate::{
   app::{
     AppHandle, ChannelInterceptor, GlobalWebviewEventListener, GlobalWindowEventListener,
     OnPageLoad,
   },
-  event::{is_event_name_valid, Event, EventId, EventTarget, Listeners},
+  event::{is_event_name_valid, EmitArgs, Event, EventId, EventTarget, Listeners},
   ipc::{Invoke, InvokeHandler, RuntimeAuthority},
   plugin::PluginStore,
   utils::{config::Config, PackageInfo},
-  Assets, Context, Pattern, Runtime, StateManager, Window,
+  Assets, Context, Pattern, Runtime, StateManager, Webview, Window,
 };
-use crate::{event::EmitArgs, resources::ResourceTable, Webview};
 
 #[cfg(desktop)]
 mod menu;
