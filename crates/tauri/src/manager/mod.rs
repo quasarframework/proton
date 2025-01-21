@@ -516,7 +516,7 @@ impl<R: Runtime> AppManager<R> {
     handler: F,
   ) -> EventId {
     let event = EventName::new(event).unwrap();
-    self.listeners().listen(event.into_inner(), target, handler)
+    self.listeners().listen(event, target, handler)
   }
 
   /// # Panics
@@ -528,7 +528,7 @@ impl<R: Runtime> AppManager<R> {
     handler: F,
   ) -> EventId {
     let event = EventName::new(event).unwrap();
-    self.listeners().once(event.into_inner(), target, handler)
+    self.listeners().once(event, target, handler)
   }
 
   pub fn unlisten(&self, id: EventId) {
@@ -539,9 +539,11 @@ impl<R: Runtime> AppManager<R> {
     feature = "tracing",
     tracing::instrument("app::emit", skip(self, payload))
   )]
-  pub fn emit<S: Serialize + Clone>(&self, event: &str, payload: S) -> crate::Result<()> {
-    let event = EventName::new(event)?;
-
+  pub fn emit<S: Serialize + Clone>(
+    &self,
+    event: EventName<&str>,
+    payload: S,
+  ) -> crate::Result<()> {
     #[cfg(feature = "tracing")]
     let _span = tracing::debug_span!("emit::run").entered();
     let emit_args = EmitArgs::new(event, payload)?;
@@ -564,13 +566,16 @@ impl<R: Runtime> AppManager<R> {
     feature = "tracing",
     tracing::instrument("app::emit::filter", skip(self, payload, filter))
   )]
-  pub fn emit_filter<S, F>(&self, event: &str, payload: S, filter: F) -> crate::Result<()>
+  pub fn emit_filter<S, F>(
+    &self,
+    event: EventName<&str>,
+    payload: S,
+    filter: F,
+  ) -> crate::Result<()>
   where
     S: Serialize + Clone,
     F: Fn(&EventTarget) -> bool,
   {
-    let event = EventName::new(event)?;
-
     #[cfg(feature = "tracing")]
     let _span = tracing::debug_span!("emit::run").entered();
     let emit_args = EmitArgs::new(event, payload)?;
@@ -592,7 +597,7 @@ impl<R: Runtime> AppManager<R> {
     feature = "tracing",
     tracing::instrument("app::emit::to", skip(self, target, payload), fields(target))
   )]
-  pub fn emit_to<I, S>(&self, target: I, event: &str, payload: S) -> crate::Result<()>
+  pub fn emit_to<I, S>(&self, target: I, event: EventName<&str>, payload: S) -> crate::Result<()>
   where
     I: Into<EventTarget>,
     S: Serialize + Clone,

@@ -405,7 +405,7 @@ tauri::Builder::default()
     // run on the main thread to fix a deadlock on webview.eval if the tracing feature is enabled
     let _ = window.run_on_main_thread(move || {
       let _ = app_manager.emit(
-        "tauri://window-created",
+        crate::EventName::from_str("tauri://window-created"),
         Some(crate::webview::CreatedEvent {
           label: window_label,
         }),

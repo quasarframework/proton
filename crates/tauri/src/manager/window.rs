@@ -18,21 +18,23 @@ use tauri_runtime::{
 
 use crate::{
   app::GlobalWindowEventListener, image::Image, sealed::ManagerBase, AppHandle, Emitter,
-  EventLoopMessage, EventTarget, Manager, Runtime, Scopes, Window, WindowEvent,
+  EventLoopMessage, EventName, EventTarget, Manager, Runtime, Scopes, Window, WindowEvent,
 };
 
-const WINDOW_RESIZED_EVENT: &str = "tauri://resize";
-const WINDOW_MOVED_EVENT: &str = "tauri://move";
-const WINDOW_CLOSE_REQUESTED_EVENT: &str = "tauri://close-requested";
-const WINDOW_DESTROYED_EVENT: &str = "tauri://destroyed";
-const WINDOW_FOCUS_EVENT: &str = "tauri://focus";
-const WINDOW_BLUR_EVENT: &str = "tauri://blur";
-const WINDOW_SCALE_FACTOR_CHANGED_EVENT: &str = "tauri://scale-change";
-const WINDOW_THEME_CHANGED: &str = "tauri://theme-changed";
-pub(crate) const DRAG_ENTER_EVENT: &str = "tauri://drag-enter";
-pub(crate) const DRAG_OVER_EVENT: &str = "tauri://drag-over";
-pub(crate) const DRAG_DROP_EVENT: &str = "tauri://drag-drop";
-pub(crate) const DRAG_LEAVE_EVENT: &str = "tauri://drag-leave";
+const WINDOW_RESIZED_EVENT: EventName<&str> = EventName::from_str("tauri://resize");
+const WINDOW_MOVED_EVENT: EventName<&str> = EventName::from_str("tauri://move");
+const WINDOW_CLOSE_REQUESTED_EVENT: EventName<&str> =
+  EventName::from_str("tauri://close-requested");
+const WINDOW_DESTROYED_EVENT: EventName<&str> = EventName::from_str("tauri://destroyed");
+const WINDOW_FOCUS_EVENT: EventName<&str> = EventName::from_str("tauri://focus");
+const WINDOW_BLUR_EVENT: EventName<&str> = EventName::from_str("tauri://blur");
+const WINDOW_SCALE_FACTOR_CHANGED_EVENT: EventName<&str> =
+  EventName::from_str("tauri://scale-change");
+const WINDOW_THEME_CHANGED: EventName<&str> = EventName::from_str("tauri://theme-changed");
+pub(crate) const DRAG_ENTER_EVENT: EventName<&str> = EventName::from_str("tauri://drag-enter");
+pub(crate) const DRAG_OVER_EVENT: EventName<&str> = EventName::from_str("tauri://drag-over");
+pub(crate) const DRAG_DROP_EVENT: EventName<&str> = EventName::from_str("tauri://drag-drop");
+pub(crate) const DRAG_LEAVE_EVENT: EventName<&str> = EventName::from_str("tauri://drag-leave");
 
 pub struct WindowManager<R: Runtime> {
   pub windows: Mutex<HashMap<String, Window<R>>>,
@@ -124,16 +126,20 @@ impl<R: Runtime> WindowManager<R> {
 
 impl<R: Runtime> Window<R> {
   /// Emits event to [`EventTarget::Window`] and [`EventTarget::WebviewWindow`]
-  fn emit_to_window<S: Serialize + Clone>(&self, event: &str, payload: S) -> crate::Result<()> {
+  fn emit_to_window<S: Serialize + Clone>(
+    &self,
+    event: EventName<&str>,
+    payload: S,
+  ) -> crate::Result<()> {
     let window_label = self.label();
-    self.emit_filter(event, payload, |target| match target {
+    self.emit_filter(&event, payload, |target| match target {
       EventTarget::Window { label } | EventTarget::WebviewWindow { label } => label == window_label,
       _ => false,
     })
   }
 
   /// Checks whether has js listener for [`EventTarget::Window`] or [`EventTarget::WebviewWindow`]
-  fn has_js_listener(&self, event: &str) -> bool {
+  fn has_js_listener(&self, event: EventName<&str>) -> bool {
     let window_label = self.label();
     let listeners = self.manager().listeners();
     listeners.has_js_listener(event, |target| match target {
@@ -192,7 +198,7 @@ fn on_window_event<R: Runtime>(window: &Window<R>, event: &WindowEvent) -> crate
         if window.is_webview_window() {
           window.emit_to(
             EventTarget::labeled(window.label()),
-            DRAG_ENTER_EVENT,
+            &DRAG_ENTER_EVENT,
             payload,
           )?
         } else {
@@ -207,7 +213,7 @@ fn on_window_event<R: Runtime>(window: &Window<R>, event: &WindowEvent) -> crate
         if window.is_webview_window() {
           window.emit_to(
             EventTarget::labeled(window.label()),
-            DRAG_OVER_EVENT,
+            &DRAG_OVER_EVENT,
             payload,
           )?
         } else {
@@ -231,7 +237,7 @@ fn on_window_event<R: Runtime>(window: &Window<R>, event: &WindowEvent) -> crate
         if window.is_webview_window() {
           window.emit_to(
             EventTarget::labeled(window.label()),
-            DRAG_DROP_EVENT,
+            &DRAG_DROP_EVENT,
             payload,
           )?
         } else {
@@ -240,7 +246,7 @@ fn on_window_event<R: Runtime>(window: &Window<R>, event: &WindowEvent) -> crate
       }
       DragDropEvent::Leave => {
         if window.is_webview_window() {
-          window.emit_to(EventTarget::labeled(window.label()), DRAG_LEAVE_EVENT, ())?
+          window.emit_to(EventTarget::labeled(window.label()), &DRAG_LEAVE_EVENT, ())?
         } else {
           window.emit_to_window(DRAG_LEAVE_EVENT, ())?
         }

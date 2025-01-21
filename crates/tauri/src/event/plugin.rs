@@ -24,6 +24,8 @@ fn is_event_name_valid(event: &str) -> bool {
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct EventName<S = String>(S);
 
+impl Copy for EventName<&str> {}
+
 impl<S: AsRef<str>> Deref for EventName<S> {
   type Target = str;
 
@@ -43,6 +45,16 @@ impl<S: AsRef<str>> EventName<S> {
   pub(crate) fn into_inner(self) -> S {
     self.0
   }
+
+  pub(crate) fn as_str_event(&self) -> EventName<&str> {
+    EventName(self.0.as_ref())
+  }
+}
+
+impl<S: std::fmt::Display> std::fmt::Display for EventName<S> {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    self.0.fmt(f)
+  }
 }
 
 impl EventName<&'static str> {
@@ -54,7 +66,7 @@ impl EventName<&'static str> {
 }
 
 impl EventName<&str> {
-  pub fn into_owned(&self) -> EventName {
+  pub fn into_owned(self) -> EventName {
     EventName(self.0.to_string())
   }
 }
@@ -106,7 +118,7 @@ pub async fn listen<R: Runtime>(
   target: EventTarget,
   handler: CallbackFn,
 ) -> Result<EventId> {
-  webview.listen_js(&event, target, handler)
+  webview.listen_js(event.as_str_event(), target, handler)
 }
 
 #[command(root = "crate")]
@@ -115,7 +127,7 @@ pub async fn unlisten<R: Runtime>(
   event: EventName,
   event_id: EventId,
 ) -> Result<()> {
-  webview.unlisten_js(&event, event_id)
+  webview.unlisten_js(event.as_str_event(), event_id)
 }
 
 #[command(root = "crate")]

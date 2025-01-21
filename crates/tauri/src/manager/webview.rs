@@ -633,7 +633,7 @@ impl<R: Runtime> WebviewManager<R> {
     }
 
     let _ = webview.manager.emit(
-      "tauri://webview-created",
+      crate::EventName::from_str("tauri://webview-created"),
       Some(crate::webview::CreatedEvent {
         label: webview.label().into(),
       }),
@@ -680,14 +680,14 @@ fn on_webview_event<R: Runtime>(webview: &Webview<R>, event: &WebviewEvent) -> c
           paths: Some(paths),
           position,
         };
-        webview.emit_to_webview(DRAG_ENTER_EVENT, payload)?
+        webview.emit_to_webview(&DRAG_ENTER_EVENT, payload)?
       }
       DragDropEvent::Over { position } => {
         let payload = DragDropPayload {
           position,
           paths: None,
         };
-        webview.emit_to_webview(DRAG_OVER_EVENT, payload)?
+        webview.emit_to_webview(&DRAG_OVER_EVENT, payload)?
       }
       DragDropEvent::Drop { paths, position } => {
         let scopes = webview.state::<Scopes>();
@@ -702,9 +702,9 @@ fn on_webview_event<R: Runtime>(webview: &Webview<R>, event: &WebviewEvent) -> c
           paths: Some(paths),
           position,
         };
-        webview.emit_to_webview(DRAG_DROP_EVENT, payload)?
+        webview.emit_to_webview(&DRAG_DROP_EVENT, payload)?
       }
-      DragDropEvent::Leave => webview.emit_to_webview(DRAG_LEAVE_EVENT, ())?,
+      DragDropEvent::Leave => webview.emit_to_webview(&DRAG_LEAVE_EVENT, ())?,
       _ => unimplemented!(),
     },
   }

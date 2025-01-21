@@ -35,8 +35,8 @@ use crate::{
   },
   manager::AppManager,
   sealed::{ManagerBase, RuntimeOrDispatch},
-  AppHandle, Emitter, Event, EventId, EventLoopMessage, Listener, Manager, ResourceTable, Runtime,
-  Window,
+  AppHandle, Emitter, Event, EventId, EventLoopMessage, EventName, Listener, Manager,
+  ResourceTable, Runtime, Window,
 };
 
 use std::{
@@ -1491,7 +1491,7 @@ fn main() {
   /// Register a JS event listener and return its identifier.
   pub(crate) fn listen_js(
     &self,
-    event: &str,
+    event: EventName<&str>,
     target: EventTarget,
     handler: CallbackFn,
   ) -> crate::Result<EventId> {
@@ -1513,7 +1513,7 @@ fn main() {
   }
 
   /// Unregister a JS event listener.
-  pub(crate) fn unlisten_js(&self, event: &str, id: EventId) -> crate::Result<()> {
+  pub(crate) fn unlisten_js(&self, event: EventName<&str>, id: EventId) -> crate::Result<()> {
     let listeners = self.manager().listeners();
 
     self.eval(&crate::event::unlisten_js_script(

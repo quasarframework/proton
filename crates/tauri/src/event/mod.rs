@@ -156,7 +156,7 @@ impl Event {
 pub fn listen_js_script(
   listeners_object_name: &str,
   serialized_target: &str,
-  event: &str,
+  event: EventName<&str>,
   event_id: EventId,
   handler: &str,
 ) -> String {
@@ -195,7 +195,7 @@ pub fn emit_js_script(
 
 pub fn unlisten_js_script(
   listeners_object_name: &str,
-  event_name: &str,
+  event_name: EventName<&str>,
   event_id: EventId,
 ) -> String {
   format!(
