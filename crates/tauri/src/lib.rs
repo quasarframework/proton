@@ -906,9 +906,8 @@ pub trait Listener<R: Runtime>: sealed::ManagerBase<R> {
   where
     F: Fn(Event) + Send + 'static,
   {
-    self
-      .manager()
-      .listen(event.into(), EventTarget::Any, handler)
+    let event = EventName::new(event.into()).unwrap();
+    self.manager().listen(event, EventTarget::Any, handler)
   }
 
   /// Listens once to an emitted event to any [target](EventTarget) .
@@ -920,7 +919,8 @@ pub trait Listener<R: Runtime>: sealed::ManagerBase<R> {
   where
     F: FnOnce(Event) + Send + 'static,
   {
-    self.manager().once(event.into(), EventTarget::Any, handler)
+    let event = EventName::new(event.into()).unwrap();
+    self.manager().once(event, EventTarget::Any, handler)
   }
 }
 

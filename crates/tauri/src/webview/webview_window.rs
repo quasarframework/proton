@@ -15,7 +15,7 @@ use crate::{
   ipc::ScopeObject,
   runtime::dpi::{PhysicalPosition, PhysicalSize},
   window::Monitor,
-  Emitter, Listener, ResourceTable, Window,
+  Emitter, EventName, Listener, ResourceTable, Window,
 };
 #[cfg(desktop)]
 use crate::{
@@ -2009,8 +2009,9 @@ impl<R: Runtime> Listener<R> for WebviewWindow<R> {
   where
     F: Fn(Event) + Send + 'static,
   {
+    let event = EventName::new(event.into()).unwrap();
     self.manager().listen(
-      event.into(),
+      event,
       EventTarget::WebviewWindow {
         label: self.label().to_string(),
       },
@@ -2025,8 +2026,9 @@ impl<R: Runtime> Listener<R> for WebviewWindow<R> {
   where
     F: FnOnce(Event) + Send + 'static,
   {
+    let event = EventName::new(event.into()).unwrap();
     self.manager().once(
-      event.into(),
+      event,
       EventTarget::WebviewWindow {
         label: self.label().to_string(),
       },

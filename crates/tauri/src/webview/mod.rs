@@ -1711,8 +1711,9 @@ tauri::Builder::default()
   where
     F: Fn(Event) + Send + 'static,
   {
+    let event = EventName::new(event.into()).unwrap();
     self.manager.listen(
-      event.into(),
+      event,
       EventTarget::Webview {
         label: self.label().to_string(),
       },
@@ -1727,8 +1728,9 @@ tauri::Builder::default()
   where
     F: FnOnce(Event) + Send + 'static,
   {
+    let event = EventName::new(event.into()).unwrap();
     self.manager.once(
-      event.into(),
+      event,
       EventTarget::Webview {
         label: self.label().to_string(),
       },

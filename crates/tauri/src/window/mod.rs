@@ -28,7 +28,7 @@ use crate::{
   sealed::{ManagerBase, RuntimeOrDispatch},
   utils::config::{WindowConfig, WindowEffectsConfig},
   webview::WebviewBuilder,
-  Emitter, EventLoopMessage, Listener, Manager, ResourceTable, Runtime, Theme, Webview,
+  Emitter, EventLoopMessage, EventName, Listener, Manager, ResourceTable, Runtime, Theme, Webview,
   WindowEvent,
 };
 #[cfg(desktop)]
@@ -2150,8 +2150,9 @@ tauri::Builder::default()
   where
     F: Fn(Event) + Send + 'static,
   {
+    let event = EventName::new(event.into()).unwrap();
     self.manager.listen(
-      event.into(),
+      event,
       EventTarget::Window {
         label: self.label().to_string(),
       },
@@ -2166,8 +2167,9 @@ tauri::Builder::default()
   where
     F: FnOnce(Event) + Send + 'static,
   {
+    let event = EventName::new(event.into()).unwrap();
     self.manager.once(
-      event.into(),
+      event,
       EventTarget::Window {
         label: self.label().to_string(),
       },

@@ -18,8 +18,8 @@ use crate::{
   sealed::{ManagerBase, RuntimeOrDispatch},
   utils::{config::Config, Env},
   webview::PageLoadPayload,
-  Context, DeviceEventFilter, Emitter, EventLoopMessage, Listener, Manager, Monitor, Runtime,
-  Scopes, StateManager, Theme, Webview, WebviewWindowBuilder, Window,
+  Context, DeviceEventFilter, Emitter, EventLoopMessage, EventName, Listener, Manager, Monitor,
+  Runtime, Scopes, StateManager, Theme, Webview, WebviewWindowBuilder, Window,
 };
 
 #[cfg(desktop)]
@@ -928,7 +928,8 @@ macro_rules! shared_app_impl {
       where
         F: Fn(Event) + Send + 'static,
       {
-        self.manager.listen(event.into(), EventTarget::App, handler)
+        let event = EventName::new(event.into()).unwrap();
+        self.manager.listen(event, EventTarget::App, handler)
       }
 
       /// Listen to an event on this app only once.
@@ -938,7 +939,8 @@ macro_rules! shared_app_impl {
       where
         F: FnOnce(Event) + Send + 'static,
       {
-        self.manager.once(event.into(), EventTarget::App, handler)
+        let event = EventName::new(event.into()).unwrap();
+        self.manager.once(event, EventTarget::App, handler)
       }
 
       /// Unlisten to an event on this app.

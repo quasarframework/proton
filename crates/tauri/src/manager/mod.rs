@@ -511,11 +511,10 @@ impl<R: Runtime> AppManager<R> {
   /// Will panic if `event` contains characters other than alphanumeric, `-`, `/`, `:` and `_`
   pub fn listen<F: Fn(Event) + Send + 'static>(
     &self,
-    event: String,
+    event: EventName,
     target: EventTarget,
     handler: F,
   ) -> EventId {
-    let event = EventName::new(event).unwrap();
     self.listeners().listen(event, target, handler)
   }
 
@@ -523,11 +522,10 @@ impl<R: Runtime> AppManager<R> {
   /// Will panic if `event` contains characters other than alphanumeric, `-`, `/`, `:` and `_`
   pub fn once<F: FnOnce(Event) + Send + 'static>(
     &self,
-    event: String,
+    event: EventName,
     target: EventTarget,
     handler: F,
   ) -> EventId {
-    let event = EventName::new(event).unwrap();
     self.listeners().once(event, target, handler)
   }
 
