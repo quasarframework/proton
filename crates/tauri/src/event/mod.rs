@@ -10,13 +10,6 @@ pub(crate) use listener::Listeners;
 pub(crate) use plugin::EventName;
 use serde::{Deserialize, Serialize};
 
-/// Checks if an event name is valid.
-pub fn is_event_name_valid(event: &str) -> bool {
-  event
-    .chars()
-    .all(|c| c.is_alphanumeric() || c == '-' || c == '/' || c == ':' || c == '_')
-}
-
 /// Unique id of an event.
 pub type EventId = u32;
 

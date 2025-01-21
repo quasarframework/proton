@@ -938,14 +938,9 @@ pub trait Emitter<R: Runtime>: sealed::ManagerBase<R> {
   ///   app.emit("synchronized", ());
   /// }
   /// ```
-  /// # Panics
-  /// Will panic if `event` contains characters other than alphanumeric, `-`, `/`, `:` and `_`
   fn emit<S: Serialize + Clone>(&self, event: &str, payload: S) -> Result<()> {
-    assert!(
-      event::is_event_name_valid(event),
-      "Event name must include only alphanumeric characters, `-`, `/`, `:` and `_`."
-    );
-    self.manager().emit(event, payload)
+    let event = EventName::new(event)?;
+    self.manager().emit(&*event, payload)
   }
 
   /// Emits an event to all [targets](EventTarget) matching the given target.
@@ -970,18 +965,13 @@ pub trait Emitter<R: Runtime>: sealed::ManagerBase<R> {
   ///   }
   /// }
   /// ```
-  /// # Panics
-  /// Will panic if `event` contains characters other than alphanumeric, `-`, `/`, `:` and `_`
   fn emit_to<I, S>(&self, target: I, event: &str, payload: S) -> Result<()>
   where
     I: Into<EventTarget>,
     S: Serialize + Clone,
   {
-    assert!(
-      event::is_event_name_valid(event),
-      "Event name must include only alphanumeric characters, `-`, `/`, `:` and `_`."
-    );
-    self.manager().emit_to(target, event, payload)
+    let event = EventName::new(event)?;
+    self.manager().emit_to(target, &*event, payload)
   }
 
   /// Emits an event to all [targets](EventTarget) based on the given filter.
@@ -1002,18 +992,13 @@ pub trait Emitter<R: Runtime>: sealed::ManagerBase<R> {
   ///   }
   /// }
   /// ```
-  /// # Panics
-  /// Will panic if `event` contains characters other than alphanumeric, `-`, `/`, `:` and `_`
   fn emit_filter<S, F>(&self, event: &str, payload: S, filter: F) -> Result<()>
   where
     S: Serialize + Clone,
     F: Fn(&EventTarget) -> bool,
   {
-    assert!(
-      event::is_event_name_valid(event),
-      "Event name must include only alphanumeric characters, `-`, `/`, `:` and `_`."
-    );
-    self.manager().emit_filter(event, payload, filter)
+    let event = EventName::new(event)?;
+    self.manager().emit_filter(&*event, payload, filter)
   }
 }
 

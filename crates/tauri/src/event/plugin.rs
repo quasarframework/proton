@@ -12,7 +12,14 @@ use crate::plugin::{Builder, TauriPlugin};
 use crate::{command, ipc::CallbackFn, EventId, Result, Runtime};
 use crate::{AppHandle, Emitter, Webview};
 
-use super::{is_event_name_valid, EventTarget};
+use super::EventTarget;
+
+/// Checks if an event name is valid.
+fn is_event_name_valid(event: &str) -> bool {
+  event
+    .chars()
+    .all(|c| c.is_alphanumeric() || c == '-' || c == '/' || c == ':' || c == '_')
+}
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct EventName<S = String>(S);
