@@ -128,6 +128,15 @@ impl EmitArgs {
       payload: serde_json::to_string(payload)?,
     })
   }
+
+  pub fn new_str(event: EventName<&str>, payload: String) -> crate::Result<Self> {
+    #[cfg(feature = "tracing")]
+    let _span = tracing::debug_span!("window::emit::json").entered();
+    Ok(EmitArgs {
+      event: event.into_owned(),
+      payload,
+    })
+  }
 }
 
 /// An event that was emitted.

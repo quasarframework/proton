@@ -21,6 +21,8 @@ use crate::{
   EventLoopMessage, EventTarget, Manager, Runtime, Scopes, Window, WindowEvent,
 };
 
+use super::EmitPayload;
+
 const WINDOW_RESIZED_EVENT: EventName<&str> = EventName::from_str("tauri://resize");
 const WINDOW_MOVED_EVENT: EventName<&str> = EventName::from_str("tauri://move");
 const WINDOW_CLOSE_REQUESTED_EVENT: EventName<&str> =
@@ -128,6 +130,7 @@ impl<R: Runtime> Window<R> {
   /// Emits event to [`EventTarget::Window`] and [`EventTarget::WebviewWindow`]
   fn emit_to_window<S: Serialize>(&self, event: EventName<&str>, payload: &S) -> crate::Result<()> {
     let window_label = self.label();
+    let payload = EmitPayload::Serialize(payload);
     self
       .manager()
       .emit_filter(event, payload, |target| match target {
@@ -200,7 +203,7 @@ fn on_window_event<R: Runtime>(window: &Window<R>, event: &WindowEvent) -> crate
           window.manager().emit_to(
             EventTarget::labeled(window.label()),
             DRAG_ENTER_EVENT,
-            &payload,
+            EmitPayload::Serialize(&payload),
           )?
         } else {
           window.emit_to_window(DRAG_ENTER_EVENT, &payload)?
@@ -216,7 +219,7 @@ fn on_window_event<R: Runtime>(window: &Window<R>, event: &WindowEvent) -> crate
           window.manager().emit_to(
             EventTarget::labeled(window.label()),
             DRAG_OVER_EVENT,
-            &payload,
+            EmitPayload::Serialize(&payload),
           )?
         } else {
           window.emit_to_window(DRAG_OVER_EVENT, &payload)?
@@ -241,7 +244,7 @@ fn on_window_event<R: Runtime>(window: &Window<R>, event: &WindowEvent) -> crate
           window.manager().emit_to(
             EventTarget::labeled(window.label()),
             DRAG_DROP_EVENT,
-            &payload,
+            EmitPayload::Serialize(&payload),
           )?
         } else {
           window.emit_to_window(DRAG_DROP_EVENT, &payload)?
@@ -252,7 +255,7 @@ fn on_window_event<R: Runtime>(window: &Window<R>, event: &WindowEvent) -> crate
           // use underlying manager, otherwise have to recheck EventName
           window
             .manager()
-            .emit_to(EventTarget::labeled(window.label()), DRAG_LEAVE_EVENT, &())?
+            .emit_to(EventTarget::labeled(window.label()), DRAG_LEAVE_EVENT, EmitPayload::Serialize(&()))?
         } else {
           window.emit_to_window(DRAG_LEAVE_EVENT, &())?
         }

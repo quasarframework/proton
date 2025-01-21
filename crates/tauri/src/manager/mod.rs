@@ -244,6 +244,11 @@ impl<R: Runtime> fmt::Debug for AppManager<R> {
   }
 }
 
+pub(crate) enum EmitPayload<'a, S: Serialize> {
+  Serialize(&'a S),
+  Str(String),
+}
+
 impl<R: Runtime> AppManager<R> {
   #[allow(clippy::too_many_arguments, clippy::type_complexity)]
   pub(crate) fn with_handlers(
@@ -540,11 +545,14 @@ impl<R: Runtime> AppManager<R> {
   pub(crate) fn emit<S: Serialize>(
     &self,
     event: EventName<&str>,
-    payload: &S,
+    payload: EmitPayload<'_, S>,
   ) -> crate::Result<()> {
     #[cfg(feature = "tracing")]
     let _span = tracing::debug_span!("emit::run").entered();
-    let emit_args = EmitArgs::new(event, &payload)?;
+    let emit_args = match payload {
+      EmitPayload::Serialize(payload) => EmitArgs::new(event, payload)?,
+      EmitPayload::Str(payload) => EmitArgs::new_str(event, payload)?,
+    };
 
     let listeners = self.listeners();
     let webviews = self
@@ -567,7 +575,7 @@ impl<R: Runtime> AppManager<R> {
   pub(crate) fn emit_filter<S, F>(
     &self,
     event: EventName<&str>,
-    payload: S,
+    payload: EmitPayload<'_, S>,
     filter: F,
   ) -> crate::Result<()>
   where
@@ -576,7 +584,10 @@ impl<R: Runtime> AppManager<R> {
   {
     #[cfg(feature = "tracing")]
     let _span = tracing::debug_span!("emit::run").entered();
-    let emit_args = EmitArgs::new(event, &payload)?;
+    let emit_args = match payload {
+      EmitPayload::Serialize(payload) => EmitArgs::new(event, payload)?,
+      EmitPayload::Str(payload) => EmitArgs::new_str(event, payload)?,
+    };
 
     let listeners = self.listeners();
 
@@ -599,7 +610,7 @@ impl<R: Runtime> AppManager<R> {
     &self,
     target: I,
     event: EventName<&str>,
-    payload: &S,
+    payload: EmitPayload<'_, S>,
   ) -> crate::Result<()>
   where
     I: Into<EventTarget>,

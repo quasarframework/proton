@@ -210,6 +210,7 @@ pub use self::utils::TitleBarStyle;
 
 use self::event::EventName;
 pub use self::event::{Event, EventId, EventTarget};
+use self::manager::EmitPayload;
 pub use {
   self::app::{
     App, AppHandle, AssetResolver, Builder, CloseRequestApi, RunEvent, UriSchemeContext,
@@ -940,7 +941,15 @@ pub trait Emitter<R: Runtime>: sealed::ManagerBase<R> {
   /// ```
   fn emit<S: Serialize + Clone>(&self, event: &str, payload: S) -> Result<()> {
     let event = EventName::new(event)?;
-    self.manager().emit(event, &payload)
+    let payload = EmitPayload::Serialize(&payload);
+    self.manager().emit(event, payload)
+  }
+
+  /// Similar to [`Emitter::emit`] but the payload is json serialized.
+  fn emit_str(&self, event: &str, payload: String) -> Result<()> {
+    let event = EventName::new(event)?;
+    let payload = EmitPayload::<()>::Str(payload);
+    self.manager().emit(event, payload)
   }
 
   /// Emits an event to all [targets](EventTarget) matching the given target.
@@ -971,7 +980,18 @@ pub trait Emitter<R: Runtime>: sealed::ManagerBase<R> {
     S: Serialize + Clone,
   {
     let event = EventName::new(event)?;
-    self.manager().emit_to(target, event, &payload)
+    let payload = EmitPayload::Serialize(&payload);
+    self.manager().emit_to(target, event, payload)
+  }
+
+  /// Similar to [`Emitter::emit_to`] but the payload is json serialized.
+  fn emit_str_to<I>(&self, target: I, event: &str, payload: String) -> Result<()>
+  where
+    I: Into<EventTarget>,
+  {
+    let event = EventName::new(event)?;
+    let payload = EmitPayload::<()>::Str(payload);
+    self.manager().emit_to(target, event, payload)
   }
 
   /// Emits an event to all [targets](EventTarget) based on the given filter.
@@ -998,7 +1018,18 @@ pub trait Emitter<R: Runtime>: sealed::ManagerBase<R> {
     F: Fn(&EventTarget) -> bool,
   {
     let event = EventName::new(event)?;
-    self.manager().emit_filter(event, &payload, filter)
+    let payload = EmitPayload::Serialize(&payload);
+    self.manager().emit_filter(event, payload, filter)
+  }
+
+  /// Similar to [`Emitter::emit_filter`] but the payload is json serialized.
+  fn emit_str_filter<F>(&self, event: &str, payload: String, filter: F) -> Result<()>
+  where
+    F: Fn(&EventTarget) -> bool,
+  {
+    let event = EventName::new(event)?;
+    let payload = EmitPayload::<()>::Str(payload);
+    self.manager().emit_filter(event, payload, filter)
   }
 }
 

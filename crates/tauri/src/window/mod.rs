@@ -19,7 +19,7 @@ use crate::{
   app::AppHandle,
   event::{Event, EventId, EventTarget},
   ipc::{CommandArg, CommandItem, InvokeError},
-  manager::AppManager,
+  manager::{AppManager, EmitPayload},
   runtime::{
     monitor::Monitor as RuntimeMonitor,
     window::{DetachedWindow, PendingWindow, WindowBuilder as _},
@@ -404,12 +404,11 @@ tauri::Builder::default()
     let window_label = window.label().to_string();
     // run on the main thread to fix a deadlock on webview.eval if the tracing feature is enabled
     let _ = window.run_on_main_thread(move || {
-      let _ = app_manager.emit(
-        crate::EventName::from_str("tauri://window-created"),
-        &Some(crate::webview::CreatedEvent {
-          label: window_label,
-        }),
-      );
+      let event = crate::EventName::from_str("tauri://window-created");
+      let payload = Some(crate::webview::CreatedEvent {
+        label: window_label,
+      });
+      let _ = app_manager.emit(event, EmitPayload::Serialize(&payload));
     });
 
     Ok(window)
