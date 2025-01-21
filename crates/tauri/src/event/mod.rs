@@ -7,6 +7,7 @@ pub(crate) mod plugin;
 use std::{convert::Infallible, str::FromStr};
 
 pub(crate) use listener::Listeners;
+pub(crate) use plugin::EventName;
 use serde::{Deserialize, Serialize};
 
 /// Checks if an event name is valid.

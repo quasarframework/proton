@@ -208,6 +208,7 @@ pub use runtime::ActivationPolicy;
 #[cfg(target_os = "macos")]
 pub use self::utils::TitleBarStyle;
 
+use self::event::EventName;
 pub use self::event::{Event, EventId, EventTarget};
 pub use {
   self::app::{

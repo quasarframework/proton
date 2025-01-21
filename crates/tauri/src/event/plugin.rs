@@ -14,13 +14,41 @@ use crate::{AppHandle, Emitter, Webview};
 
 use super::{is_event_name_valid, EventTarget};
 
-pub struct EventName(String);
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct EventName<S = String>(S);
 
-impl Deref for EventName {
+impl<S: AsRef<str>> Deref for EventName<S> {
   type Target = str;
 
   fn deref(&self) -> &Self::Target {
-    &self.0
+    self.0.as_ref()
+  }
+}
+
+impl<S: AsRef<str>> EventName<S> {
+  pub(crate) fn new(s: S) -> Result<EventName<S>> {
+    if !is_event_name_valid(s.as_ref()) {
+      return Err(crate::Error::IllegalEventName(s.as_ref().to_string()));
+    }
+    Ok(EventName(s))
+  }
+
+  pub(crate) fn into_inner(self) -> S {
+    self.0
+  }
+}
+
+impl EventName<&'static str> {
+  // this convenience method is for using in const contexts to discharge the preconditions
+  // &'static prevents using this function accidentally with dynamically built string slices
+  pub(crate) const fn from_str(s: &'static str) -> EventName<&'static str> {
+    EventName(s)
+  }
+}
+
+impl EventName<&str> {
+  pub fn into_owned(&self) -> EventName {
+    EventName(self.0.to_string())
   }
 }
 
@@ -107,4 +135,16 @@ pub(crate) fn init<R: Runtime>() -> TauriPlugin<R> {
   Builder::new("event")
     .invoke_handler(crate::generate_handler![listen, unlisten, emit, emit_to])
     .build()
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  #[test]
+  fn test_illegal_event_name() {
+    let s = EventName::new("some\r illegal event name")
+      .unwrap_err()
+      .to_string();
+    assert_eq!("only alphanumeric, '-', '/', ':', '_' permitted for event names: \"some\\r illegal event name\"", s);
+  }
 }
