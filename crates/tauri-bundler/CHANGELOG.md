@@ -1,5 +1,13 @@
 # Changelog
 
+## \[2.2.2]
+
+### Bug Fixes
+
+- [`72748cc45`](https://www.github.com/tauri-apps/tauri/commit/72748cc45cf670dd03c86c8deceb5942598f5ad9) ([#12365](https://www.github.com/tauri-apps/tauri/pull/12365) by [@don41382](https://www.github.com/tauri-apps/tauri/../../don41382)) Fixed an issue that caused the `.msi` installer not to lookup the `INSTALLDIR` set in the `nsis` installer.
+- [`cf771bf69`](https://www.github.com/tauri-apps/tauri/commit/cf771bf69aa26b62d11a54a69131c631505d8c55) ([#12402](https://www.github.com/tauri-apps/tauri/pull/12402) by [@FabianLars](https://www.github.com/tauri-apps/tauri/../../FabianLars)) Fixed an issue that caused the .msi installer to not contain root resources when there were .dll files present in the target directory.
+- [`07ccdc499`](https://www.github.com/tauri-apps/tauri/commit/07ccdc499c3240e7240be3abf95ef2d7d00b2dc7) ([#12324](https://www.github.com/tauri-apps/tauri/pull/12324) by [@FabianLars](https://www.github.com/tauri-apps/tauri/../../FabianLars)) Fixed an issue leading to NSIS based installers to not contain the `WebView2Loader.dll` file when targetting `windows-gnu`.
+
 ## \[2.2.1]
 
 ### Bug Fixes
