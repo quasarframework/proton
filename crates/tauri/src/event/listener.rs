@@ -199,7 +199,7 @@ impl Listeners {
     match self.inner.handlers.try_lock() {
       Err(_) => self.insert_pending(Pending::Emit(emit_args)),
       Ok(lock) => {
-        if let Some(handlers) = lock.get(&emit_args.event_name) {
+        if let Some(handlers) = lock.get(&*emit_args.event_name) {
           let handlers = handlers.iter();
           let handlers = handlers.filter(|(_, h)| match_any_or_filter(&h.target, &filter));
           for (&id, Handler { callback, .. }) in handlers {
@@ -384,7 +384,7 @@ mod test {
       listeners.listen(key.clone(), EventTarget::Any, event_fn);
       // call on event with key and d.
       listeners.emit(EmitArgs {
-        event_name: key.clone(),
+        event_name: crate::EventName::new(key.clone()).unwrap(),
         event: serde_json::to_string(&key).unwrap(),
         payload: serde_json::to_string(&d).unwrap()
       })?;
