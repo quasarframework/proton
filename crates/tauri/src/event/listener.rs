@@ -269,7 +269,6 @@ impl Listeners {
   pub(crate) fn emit_js_filter<'a, R, I, F>(
     &self,
     mut webviews: I,
-    event: &str,
     emit_args: &EmitArgs,
     filter: Option<F>,
   ) -> crate::Result<()>
@@ -280,6 +279,7 @@ impl Listeners {
   {
     let js_listeners = self.inner.js_event_listeners.lock().unwrap();
     webviews.try_for_each(|webview| {
+      let event = &emit_args.event;
       if let Some(handlers) = js_listeners.get(webview.label()).and_then(|s| s.get(event)) {
         let ids = handlers
           .iter()
@@ -293,22 +293,12 @@ impl Listeners {
     })
   }
 
-  pub(crate) fn emit_js<'a, R, I>(
-    &self,
-    webviews: I,
-    event: &str,
-    emit_args: &EmitArgs,
-  ) -> crate::Result<()>
+  pub(crate) fn emit_js<'a, R, I>(&self, webviews: I, emit_args: &EmitArgs) -> crate::Result<()>
   where
     R: Runtime,
     I: Iterator<Item = &'a Webview<R>>,
   {
-    self.emit_js_filter(
-      webviews,
-      event,
-      emit_args,
-      None::<&dyn Fn(&EventTarget) -> bool>,
-    )
+    self.emit_js_filter(webviews, emit_args, None::<&dyn Fn(&EventTarget) -> bool>)
   }
 }
 

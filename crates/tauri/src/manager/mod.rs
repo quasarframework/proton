@@ -554,7 +554,7 @@ impl<R: Runtime> AppManager<R> {
       .cloned()
       .collect::<Vec<_>>();
 
-    listeners.emit_js(webviews.iter(), &*emit_args.event, &emit_args)?;
+    listeners.emit_js(webviews.iter(), &emit_args)?;
     listeners.emit(emit_args)?;
 
     Ok(())
@@ -579,7 +579,6 @@ impl<R: Runtime> AppManager<R> {
 
     listeners.emit_js_filter(
       self.webview.webviews_lock().values(),
-      &*emit_args.event,
       &emit_args,
       Some(&filter),
     )?;
