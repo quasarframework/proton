@@ -143,20 +143,10 @@ fn try_add_numeric_build_number(version_str: &str) -> anyhow::Result<String> {
     }
   }
 
-  Ok(format!(
-    "{}.{}.{}.0",
-    version.major, version.minor, version.patch,
-  ))
-}
-
-fn add_build_number(version_str: &str) -> anyhow::Result<String> {
-  let version = semver::Version::parse(version_str).context("invalid app version")?;
-  if !version.build.is_empty() {
-    return Ok(format!(
-      "{}.{}.{}.{}",
-      version.major, version.minor, version.patch, version.build
-    ));
-  }
+  log::warn!(
+    "Unable to parse version build metadata. Numeric value expected, received: {}",
+    version.build
+  );
 
   Ok(format!(
     "{}.{}.{}.0",
@@ -225,7 +215,7 @@ fn build_nsis_app_installer(
   }
 
   let version = settings.version_string();
-  data.insert("version", to_json(add_build_number(version)?));
+  data.insert("version", to_json(version));
   data.insert(
     "version_with_build",
     to_json(try_add_numeric_build_number(version)?),
