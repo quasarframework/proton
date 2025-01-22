@@ -24,7 +24,7 @@ enum Pending {
     event: crate::EventName,
     handler: Handler,
   },
-  Emit(EmitArgs),
+  Emit(crate::EventName, EmitArgs),
 }
 
 /// Stored in [`Listeners`] to be called upon, when the event that stored it, is triggered.
@@ -128,8 +128,8 @@ impl Listeners {
       match action {
         Pending::Unlisten(id) => self.unlisten(id),
         Pending::Listen { id, event, handler } => self.listen_with_id(id, event, handler),
-        Pending::Emit(args) => {
-          self.emit(args)?;
+        Pending::Emit(event, args) => {
+          self.emit(event, args)?;
         }
       }
     }
@@ -193,16 +193,21 @@ impl Listeners {
   }
 
   /// Emits the given event with its payload based on a filter.
-  pub(crate) fn emit_filter<F>(&self, emit_args: EmitArgs, filter: Option<F>) -> crate::Result<()>
+  pub(crate) fn emit_filter<F>(
+    &self,
+    event: crate::EventName,
+    emit_args: EmitArgs,
+    filter: Option<F>,
+  ) -> crate::Result<()>
   where
     F: Fn(&EventTarget) -> bool,
   {
     let mut maybe_pending = false;
 
     match self.inner.handlers.try_lock() {
-      Err(_) => self.insert_pending(Pending::Emit(emit_args)),
+      Err(_) => self.insert_pending(Pending::Emit(event, emit_args)),
       Ok(lock) => {
-        if let Some(handlers) = lock.get(emit_args.event_name.as_str()) {
+        if let Some(handlers) = lock.get(event.as_str()) {
           let handlers = handlers.iter();
           let handlers = handlers.filter(|(_, h)| match_any_or_filter(&h.target, &filter));
           for (&id, Handler { callback, .. }) in handlers {
@@ -221,8 +226,8 @@ impl Listeners {
   }
 
   /// Emits the given event with its payload.
-  pub(crate) fn emit(&self, emit_args: EmitArgs) -> crate::Result<()> {
-    self.emit_filter(emit_args, None::<&dyn Fn(&EventTarget) -> bool>)
+  pub(crate) fn emit(&self, event: crate::EventName, emit_args: EmitArgs) -> crate::Result<()> {
+    self.emit_filter(event, emit_args, None::<&dyn Fn(&EventTarget) -> bool>)
   }
 
   pub(crate) fn listen_js(
@@ -376,8 +381,7 @@ mod test {
       // call listen with key and the event_fn dummy func
       listeners.listen(key.clone(), EventTarget::Any, event_fn);
       // call on event with key and d.
-      listeners.emit(EmitArgs {
-        event_name: key.clone(),
+      listeners.emit(key.clone(), EmitArgs {
         event: serde_json::to_string(&e).unwrap(),
         payload: serde_json::to_string(&d).unwrap()
       })?;
