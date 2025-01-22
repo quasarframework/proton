@@ -25,8 +25,7 @@ use crate::{
   pattern::PatternJavascript,
   sealed::ManagerBase,
   webview::PageLoadPayload,
-  Emitter, EventLoopMessage, EventTarget, Manager, Runtime, Scopes, UriSchemeContext, Webview,
-  Window,
+  EventLoopMessage, EventTarget, Manager, Runtime, Scopes, UriSchemeContext, Webview, Window,
 };
 
 use super::{
@@ -661,14 +660,20 @@ impl<R: Runtime> WebviewManager<R> {
 
 impl<R: Runtime> Webview<R> {
   /// Emits event to [`EventTarget::Window`] and [`EventTarget::WebviewWindow`]
-  fn emit_to_webview<S: Serialize + Clone>(&self, event: &str, payload: S) -> crate::Result<()> {
+  fn emit_to_webview<S: Serialize + Clone>(
+    &self,
+    event: crate::EventName<&str>,
+    payload: S,
+  ) -> crate::Result<()> {
     let window_label = self.label();
-    self.emit_filter(event, payload, |target| match target {
-      EventTarget::Webview { label } | EventTarget::WebviewWindow { label } => {
-        label == window_label
-      }
-      _ => false,
-    })
+    self
+      .manager()
+      .emit_filter(event, payload, |target| match target {
+        EventTarget::Webview { label } | EventTarget::WebviewWindow { label } => {
+          label == window_label
+        }
+        _ => false,
+      })
   }
 }
 
@@ -680,14 +685,14 @@ fn on_webview_event<R: Runtime>(webview: &Webview<R>, event: &WebviewEvent) -> c
           paths: Some(paths),
           position,
         };
-        webview.emit_to_webview(&DRAG_ENTER_EVENT, payload)?
+        webview.emit_to_webview(DRAG_ENTER_EVENT, payload)?
       }
       DragDropEvent::Over { position } => {
         let payload = DragDropPayload {
           position,
           paths: None,
         };
-        webview.emit_to_webview(&DRAG_OVER_EVENT, payload)?
+        webview.emit_to_webview(DRAG_OVER_EVENT, payload)?
       }
       DragDropEvent::Drop { paths, position } => {
         let scopes = webview.state::<Scopes>();
@@ -702,9 +707,9 @@ fn on_webview_event<R: Runtime>(webview: &Webview<R>, event: &WebviewEvent) -> c
           paths: Some(paths),
           position,
         };
-        webview.emit_to_webview(&DRAG_DROP_EVENT, payload)?
+        webview.emit_to_webview(DRAG_DROP_EVENT, payload)?
       }
-      DragDropEvent::Leave => webview.emit_to_webview(&DRAG_LEAVE_EVENT, ())?,
+      DragDropEvent::Leave => webview.emit_to_webview(DRAG_LEAVE_EVENT, ())?,
       _ => unimplemented!(),
     },
   }
