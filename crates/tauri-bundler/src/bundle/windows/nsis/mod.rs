@@ -225,8 +225,11 @@ fn build_nsis_app_installer(
   }
 
   let version = settings.version_string();
-  data.insert("version", to_json(try_add_numeric_build_number(version)?));
-  data.insert("version_with_build", to_json(add_build_number(version)?));
+  data.insert("version", to_json(add_build_number(version)?));
+  data.insert(
+    "version_with_build",
+    to_json(try_add_numeric_build_number(version)?),
+  );
 
   data.insert(
     "allow_downgrades",
