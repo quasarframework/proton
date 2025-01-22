@@ -104,8 +104,13 @@ webkit2gtk = { version = "=2.0.1", features = ["v2_40"] }
 embed_plist = "1.2"
 plist = "1"
 objc2 = "0.5"
-objc2-foundation = { version = "0.2", features = ["NSData", "NSThread"] }
-objc2-app-kit = { version = "0.2", features = [
+objc2-foundation = { version = "0.2", default-features = false, features = [
+  "std",
+  "NSData",
+  "NSThread",
+] }
+objc2-app-kit = { version = "0.2", default-features = false, features = [
+  "std",
   "NSApplication",
   "NSColor",
   "NSResponder",
