@@ -61,7 +61,7 @@ async fn emit<R: Runtime>(
   event: EventName,
   payload: Option<JsonValue>,
 ) -> Result<()> {
-  app.emit(&event, payload)
+  app.emit(event.as_str(), payload)
 }
 
 #[command(root = "crate")]
@@ -71,7 +71,7 @@ async fn emit_to<R: Runtime>(
   event: EventName,
   payload: Option<JsonValue>,
 ) -> Result<()> {
-  app.emit_to(target, &event, payload)
+  app.emit_to(target, event.as_str(), payload)
 }
 
 /// Initializes the event plugin.

@@ -202,7 +202,7 @@ impl Listeners {
     match self.inner.handlers.try_lock() {
       Err(_) => self.insert_pending(Pending::Emit(emit_args)),
       Ok(lock) => {
-        if let Some(handlers) = lock.get(&*emit_args.event_name) {
+        if let Some(handlers) = lock.get(emit_args.event_name.as_str()) {
           let handlers = handlers.iter();
           let handlers = handlers.filter(|(_, h)| match_any_or_filter(&h.target, &filter));
           for (&id, Handler { callback, .. }) in handlers {
@@ -245,11 +245,11 @@ impl Listeners {
     let mut js_listeners = self.inner.js_event_listeners.lock().unwrap();
     let js_listeners = js_listeners.values_mut();
     for js_listeners in js_listeners {
-      if let Some(handlers) = js_listeners.get_mut(&*event) {
+      if let Some(handlers) = js_listeners.get_mut(event.as_str()) {
         handlers.retain(|h| h.id != id);
 
         if handlers.is_empty() {
-          js_listeners.remove(&*event);
+          js_listeners.remove(event.as_str());
         }
       }
     }
@@ -263,7 +263,7 @@ impl Listeners {
     let js_listeners = self.inner.js_event_listeners.lock().unwrap();
     js_listeners.values().any(|events| {
       events
-        .get(&*event)
+        .get(event.as_str())
         .map(|handlers| handlers.iter().any(|handler| filter(&handler.target)))
         .unwrap_or(false)
     })

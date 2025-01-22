@@ -21,14 +21,6 @@ pub struct EventName<S = String>(S);
 
 impl Copy for EventName<&str> {}
 
-impl<S: AsRef<str>> std::ops::Deref for EventName<S> {
-  type Target = str;
-
-  fn deref(&self) -> &Self::Target {
-    self.0.as_ref()
-  }
-}
-
 impl<S: AsRef<str>> EventName<S> {
   pub(crate) fn new(s: S) -> crate::Result<EventName<S>> {
     if !is_event_name_valid(s.as_ref()) {
@@ -43,6 +35,10 @@ impl<S: AsRef<str>> EventName<S> {
 
   pub(crate) fn as_str_event(&self) -> EventName<&str> {
     EventName(self.0.as_ref())
+  }
+
+  pub(crate) fn as_str(&self) -> &str {
+    self.0.as_ref()
   }
 }
 
@@ -195,7 +191,7 @@ impl EmitArgs {
     #[cfg(feature = "tracing")]
     let _span = tracing::debug_span!("window::emit::serialize").entered();
     Ok(EmitArgs {
-      event: serde_json::to_string(&*event)?,
+      event: serde_json::to_string(event.as_str())?,
       event_name: event.into_owned(),
       payload: serde_json::to_string(&payload)?,
     })

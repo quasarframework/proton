@@ -17,8 +17,8 @@ use tauri_runtime::{
 };
 
 use crate::{
-  app::GlobalWindowEventListener, image::Image, sealed::ManagerBase, AppHandle, Emitter,
-  EventLoopMessage, EventName, EventTarget, Manager, Runtime, Scopes, Window, WindowEvent,
+  app::GlobalWindowEventListener, image::Image, sealed::ManagerBase, AppHandle, EventLoopMessage,
+  EventName, EventTarget, Manager, Runtime, Scopes, Window, WindowEvent,
 };
 
 const WINDOW_RESIZED_EVENT: EventName<&str> = EventName::from_str("tauri://resize");
@@ -132,10 +132,14 @@ impl<R: Runtime> Window<R> {
     payload: S,
   ) -> crate::Result<()> {
     let window_label = self.label();
-    self.emit_filter(&event, payload, |target| match target {
-      EventTarget::Window { label } | EventTarget::WebviewWindow { label } => label == window_label,
-      _ => false,
-    })
+    self
+      .manager()
+      .emit_filter(event, payload, |target| match target {
+        EventTarget::Window { label } | EventTarget::WebviewWindow { label } => {
+          label == window_label
+        }
+        _ => false,
+      })
   }
 
   /// Checks whether has js listener for [`EventTarget::Window`] or [`EventTarget::WebviewWindow`]
@@ -196,9 +200,10 @@ fn on_window_event<R: Runtime>(window: &Window<R>, event: &WindowEvent) -> crate
         };
 
         if window.is_webview_window() {
-          window.emit_to(
+          // use underlying manager, otherwise have to recheck EventName
+          window.manager().emit_to(
             EventTarget::labeled(window.label()),
-            &DRAG_ENTER_EVENT,
+            DRAG_ENTER_EVENT,
             payload,
           )?
         } else {
@@ -211,9 +216,10 @@ fn on_window_event<R: Runtime>(window: &Window<R>, event: &WindowEvent) -> crate
           paths: None,
         };
         if window.is_webview_window() {
-          window.emit_to(
+          // use underlying manager, otherwise have to recheck EventName
+          window.manager().emit_to(
             EventTarget::labeled(window.label()),
-            &DRAG_OVER_EVENT,
+            DRAG_OVER_EVENT,
             payload,
           )?
         } else {
@@ -235,9 +241,10 @@ fn on_window_event<R: Runtime>(window: &Window<R>, event: &WindowEvent) -> crate
         };
 
         if window.is_webview_window() {
-          window.emit_to(
+          // use underlying manager, otherwise have to recheck EventName
+          window.manager().emit_to(
             EventTarget::labeled(window.label()),
-            &DRAG_DROP_EVENT,
+            DRAG_DROP_EVENT,
             payload,
           )?
         } else {
@@ -246,7 +253,10 @@ fn on_window_event<R: Runtime>(window: &Window<R>, event: &WindowEvent) -> crate
       }
       DragDropEvent::Leave => {
         if window.is_webview_window() {
-          window.emit_to(EventTarget::labeled(window.label()), &DRAG_LEAVE_EVENT, ())?
+          // use underlying manager, otherwise have to recheck EventName
+          window
+            .manager()
+            .emit_to(EventTarget::labeled(window.label()), DRAG_LEAVE_EVENT, ())?
         } else {
           window.emit_to_window(DRAG_LEAVE_EVENT, ())?
         }
