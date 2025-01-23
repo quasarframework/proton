@@ -144,7 +144,7 @@ fn try_add_numeric_build_number(version_str: &str) -> anyhow::Result<String> {
   }
 
   log::warn!(
-    "Unable to parse version build metadata. Numeric value expected, received: {}",
+    "Unable to parse version build metadata. Numeric value expected, received: `{}`. This will be replaced with `0` in `VIProductVersion` because Windows requires this field to be numeric.",
     version.build
   );
 
