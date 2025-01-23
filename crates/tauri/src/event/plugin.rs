@@ -80,15 +80,3 @@ pub(crate) fn init<R: Runtime>() -> TauriPlugin<R> {
     .invoke_handler(crate::generate_handler![listen, unlisten, emit, emit_to])
     .build()
 }
-
-#[cfg(test)]
-mod tests {
-  use super::*;
-  #[test]
-  fn test_illegal_event_name() {
-    let s = EventName::new("some\r illegal event name")
-      .unwrap_err()
-      .to_string();
-    assert_eq!("only alphanumeric, '-', '/', ':', '_' permitted for event names: \"some\\r illegal event name\"", s);
-  }
-}

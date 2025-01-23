@@ -291,3 +291,15 @@ pub fn event_initialization_script(function: &str, listeners: &str) -> String {
   "
   )
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  #[test]
+  fn test_illegal_event_name() {
+    let s = EventName::new("some\r illegal event name")
+      .unwrap_err()
+      .to_string();
+    assert_eq!("only alphanumeric, '-', '/', ':', '_' permitted for event names: \"some\\r illegal event name\"", s);
+  }
+}
