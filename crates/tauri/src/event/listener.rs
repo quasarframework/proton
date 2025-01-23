@@ -381,10 +381,7 @@ mod test {
       // call listen with key and the event_fn dummy func
       listeners.listen(key.clone(), EventTarget::Any, event_fn);
       // call on event with key and d.
-      listeners.emit(key.clone(), EmitArgs {
-        event: serde_json::to_string(&e).unwrap(),
-        payload: serde_json::to_string(&d).unwrap()
-      })?;
+      listeners.emit(key.clone(), EmitArgs::new(key.as_str_event(), &d)?)?;
 
       // lock the mutex
       let l = listeners.inner.handlers.lock().unwrap();

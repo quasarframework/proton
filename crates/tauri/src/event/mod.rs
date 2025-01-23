@@ -189,7 +189,7 @@ impl EmitArgs {
     #[cfg(feature = "tracing")]
     let _span = tracing::debug_span!("window::emit::serialize").entered();
     Ok(EmitArgs {
-      event: serde_json::to_string(event.as_str())?,
+      event: event.to_string(),
       payload: serde_json::to_string(&payload)?,
     })
   }
@@ -250,7 +250,7 @@ pub fn emit_js_script(
   serialized_ids: &str,
 ) -> crate::Result<String> {
   Ok(format!(
-    "(function () {{ const fn = window['{}']; fn && fn({{event: {}, payload: {}}}, {ids}) }})()",
+    "(function () {{ const fn = window['{}']; fn && fn({{event: \"{}\", payload: {}}}, {ids}) }})()",
     event_emit_function_name,
     emit_args.event,
     emit_args.payload,
