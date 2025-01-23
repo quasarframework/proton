@@ -9,10 +9,6 @@ env:
 on:
   pull_request:
 
-defaults:
-  run:
-    working-directory: packages/cli/
-
 jobs:
   build:
     name: build windows
@@ -32,13 +28,13 @@ jobs:
           targets: x86_64-pc-windows-msvc
       - name: Install dependencies
         run: pnpm i --frozen-lockfile --ignore-scripts
-      - name: Build
+      - name: Build CLI
         run: pnpm run -w build:cli
         shell: bash
-      - name: Build
+      - name: Build AIP
         run: pnpm run -w build:api
         shell: bash
-      - name: Build API EXE
+      - name: Build API Example App
         run: |
           cd examples/api
           pnpm tauri build
