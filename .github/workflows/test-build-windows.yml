@@ -38,12 +38,10 @@ jobs:
         run: |
           cd examples/api
           pnpm tauri build
-      - name: Output files in target/release
-        run: ls -la target/release
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: bindings-x86_64-pc-windows-msvc
-          path: target/release
+          path: target\release\bundle\nsis\*
           if-no-files-found: error
   
