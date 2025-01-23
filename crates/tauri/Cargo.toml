@@ -130,7 +130,7 @@ bytes = { version = "1", features = ["serde"] }
 reqwest = { version = "0.12", default-features = false, features = [
   "json",
   "stream",
-  "rustls-tls"
+  "rustls-tls",
 ] }
 
 # android
