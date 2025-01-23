@@ -179,9 +179,9 @@ impl FromStr for EventTarget {
 #[derive(Clone)]
 pub struct EmitArgs {
   /// Serialized event name.
-  pub event: String,
+  event: String,
   /// Serialized payload.
-  pub payload: String,
+  payload: String,
 }
 
 impl EmitArgs {
