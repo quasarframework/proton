@@ -287,7 +287,7 @@ impl Listeners {
   {
     let js_listeners = self.inner.js_event_listeners.lock().unwrap();
     webviews.try_for_each(|webview| {
-      let event = &emit_args.event;
+      let event = emit_args.event.as_str();
       if let Some(handlers) = js_listeners.get(webview.label()).and_then(|s| s.get(event)) {
         let ids = handlers
           .iter()

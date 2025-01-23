@@ -179,7 +179,7 @@ impl FromStr for EventTarget {
 #[derive(Clone)]
 pub struct EmitArgs {
   /// Serialized event name.
-  event: String,
+  event: EventName,
   /// Serialized payload.
   payload: String,
 }
@@ -189,7 +189,7 @@ impl EmitArgs {
     #[cfg(feature = "tracing")]
     let _span = tracing::debug_span!("window::emit::serialize").entered();
     Ok(EmitArgs {
-      event: event.to_string(),
+      event: event.into_owned(),
       payload: serde_json::to_string(payload)?,
     })
   }
