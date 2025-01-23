@@ -940,7 +940,7 @@ pub trait Emitter<R: Runtime>: sealed::ManagerBase<R> {
   /// ```
   fn emit<S: Serialize + Clone>(&self, event: &str, payload: S) -> Result<()> {
     let event = EventName::new(event)?;
-    self.manager().emit(event, payload)
+    self.manager().emit(event, &payload)
   }
 
   /// Emits an event to all [targets](EventTarget) matching the given target.
@@ -971,7 +971,7 @@ pub trait Emitter<R: Runtime>: sealed::ManagerBase<R> {
     S: Serialize + Clone,
   {
     let event = EventName::new(event)?;
-    self.manager().emit_to(target, event, payload)
+    self.manager().emit_to(target, event, &payload)
   }
 
   /// Emits an event to all [targets](EventTarget) based on the given filter.
@@ -998,7 +998,7 @@ pub trait Emitter<R: Runtime>: sealed::ManagerBase<R> {
     F: Fn(&EventTarget) -> bool,
   {
     let event = EventName::new(event)?;
-    self.manager().emit_filter(event, payload, filter)
+    self.manager().emit_filter(event, &payload, filter)
   }
 }
 

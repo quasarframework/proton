@@ -185,12 +185,12 @@ pub struct EmitArgs {
 }
 
 impl EmitArgs {
-  pub fn new<S: Serialize>(event: EventName<&str>, payload: S) -> crate::Result<Self> {
+  pub fn new<S: Serialize>(event: EventName<&str>, payload: &S) -> crate::Result<Self> {
     #[cfg(feature = "tracing")]
     let _span = tracing::debug_span!("window::emit::serialize").entered();
     Ok(EmitArgs {
       event: event.to_string(),
-      payload: serde_json::to_string(&payload)?,
+      payload: serde_json::to_string(payload)?,
     })
   }
 }

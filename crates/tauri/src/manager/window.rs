@@ -126,11 +126,7 @@ impl<R: Runtime> WindowManager<R> {
 
 impl<R: Runtime> Window<R> {
   /// Emits event to [`EventTarget::Window`] and [`EventTarget::WebviewWindow`]
-  fn emit_to_window<S: Serialize + Clone>(
-    &self,
-    event: EventName<&str>,
-    payload: S,
-  ) -> crate::Result<()> {
+  fn emit_to_window<S: Serialize>(&self, event: EventName<&str>, payload: &S) -> crate::Result<()> {
     let window_label = self.label();
     self
       .manager()
@@ -168,10 +164,10 @@ fn on_window_event<R: Runtime>(window: &Window<R>, event: &WindowEvent) -> crate
       if window.has_js_listener(WINDOW_CLOSE_REQUESTED_EVENT) {
         api.prevent_close();
       }
-      window.emit_to_window(WINDOW_CLOSE_REQUESTED_EVENT, ())?;
+      window.emit_to_window(WINDOW_CLOSE_REQUESTED_EVENT, &())?;
     }
     WindowEvent::Destroyed => {
-      window.emit_to_window(WINDOW_DESTROYED_EVENT, ())?;
+      window.emit_to_window(WINDOW_DESTROYED_EVENT, &())?;
     }
     WindowEvent::Focused(focused) => window.emit_to_window(
       if *focused {
@@ -179,7 +175,7 @@ fn on_window_event<R: Runtime>(window: &Window<R>, event: &WindowEvent) -> crate
       } else {
         WINDOW_BLUR_EVENT
       },
-      (),
+      &(),
     )?,
     WindowEvent::ScaleFactorChanged {
       scale_factor,
@@ -187,7 +183,7 @@ fn on_window_event<R: Runtime>(window: &Window<R>, event: &WindowEvent) -> crate
       ..
     } => window.emit_to_window(
       WINDOW_SCALE_FACTOR_CHANGED_EVENT,
-      ScaleFactorChanged {
+      &ScaleFactorChanged {
         scale_factor: *scale_factor,
         size: *new_inner_size,
       },
@@ -204,10 +200,10 @@ fn on_window_event<R: Runtime>(window: &Window<R>, event: &WindowEvent) -> crate
           window.manager().emit_to(
             EventTarget::labeled(window.label()),
             DRAG_ENTER_EVENT,
-            payload,
+            &payload,
           )?
         } else {
-          window.emit_to_window(DRAG_ENTER_EVENT, payload)?
+          window.emit_to_window(DRAG_ENTER_EVENT, &payload)?
         }
       }
       DragDropEvent::Over { position } => {
@@ -220,10 +216,10 @@ fn on_window_event<R: Runtime>(window: &Window<R>, event: &WindowEvent) -> crate
           window.manager().emit_to(
             EventTarget::labeled(window.label()),
             DRAG_OVER_EVENT,
-            payload,
+            &payload,
           )?
         } else {
-          window.emit_to_window(DRAG_OVER_EVENT, payload)?
+          window.emit_to_window(DRAG_OVER_EVENT, &payload)?
         }
       }
       DragDropEvent::Drop { paths, position } => {
@@ -245,10 +241,10 @@ fn on_window_event<R: Runtime>(window: &Window<R>, event: &WindowEvent) -> crate
           window.manager().emit_to(
             EventTarget::labeled(window.label()),
             DRAG_DROP_EVENT,
-            payload,
+            &payload,
           )?
         } else {
-          window.emit_to_window(DRAG_DROP_EVENT, payload)?
+          window.emit_to_window(DRAG_DROP_EVENT, &payload)?
         }
       }
       DragDropEvent::Leave => {
@@ -256,15 +252,15 @@ fn on_window_event<R: Runtime>(window: &Window<R>, event: &WindowEvent) -> crate
           // use underlying manager, otherwise have to recheck EventName
           window
             .manager()
-            .emit_to(EventTarget::labeled(window.label()), DRAG_LEAVE_EVENT, ())?
+            .emit_to(EventTarget::labeled(window.label()), DRAG_LEAVE_EVENT, &())?
         } else {
-          window.emit_to_window(DRAG_LEAVE_EVENT, ())?
+          window.emit_to_window(DRAG_LEAVE_EVENT, &())?
         }
       }
       _ => unimplemented!(),
     },
     WindowEvent::ThemeChanged(theme) => {
-      window.emit_to_window(WINDOW_THEME_CHANGED, theme.to_string())?
+      window.emit_to_window(WINDOW_THEME_CHANGED, &theme.to_string())?
     }
   }
   Ok(())

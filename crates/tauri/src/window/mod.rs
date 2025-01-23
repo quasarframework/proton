@@ -406,7 +406,7 @@ tauri::Builder::default()
     let _ = window.run_on_main_thread(move || {
       let _ = app_manager.emit(
         crate::EventName::from_str("tauri://window-created"),
-        Some(crate::webview::CreatedEvent {
+        &Some(crate::webview::CreatedEvent {
           label: window_label,
         }),
       );

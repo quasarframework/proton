@@ -537,14 +537,10 @@ impl<R: Runtime> AppManager<R> {
     feature = "tracing",
     tracing::instrument("app::emit", skip(self, payload))
   )]
-  pub fn emit<S: Serialize + Clone>(
-    &self,
-    event: EventName<&str>,
-    payload: S,
-  ) -> crate::Result<()> {
+  pub fn emit<S: Serialize>(&self, event: EventName<&str>, payload: &S) -> crate::Result<()> {
     #[cfg(feature = "tracing")]
     let _span = tracing::debug_span!("emit::run").entered();
-    let emit_args = EmitArgs::new(event, payload)?;
+    let emit_args = EmitArgs::new(event, &payload)?;
 
     let listeners = self.listeners();
     let webviews = self
@@ -571,12 +567,12 @@ impl<R: Runtime> AppManager<R> {
     filter: F,
   ) -> crate::Result<()>
   where
-    S: Serialize + Clone,
+    S: Serialize,
     F: Fn(&EventTarget) -> bool,
   {
     #[cfg(feature = "tracing")]
     let _span = tracing::debug_span!("emit::run").entered();
-    let emit_args = EmitArgs::new(event, payload)?;
+    let emit_args = EmitArgs::new(event, &payload)?;
 
     let listeners = self.listeners();
 
@@ -595,10 +591,10 @@ impl<R: Runtime> AppManager<R> {
     feature = "tracing",
     tracing::instrument("app::emit::to", skip(self, target, payload), fields(target))
   )]
-  pub fn emit_to<I, S>(&self, target: I, event: EventName<&str>, payload: S) -> crate::Result<()>
+  pub fn emit_to<I, S>(&self, target: I, event: EventName<&str>, payload: &S) -> crate::Result<()>
   where
     I: Into<EventTarget>,
-    S: Serialize + Clone,
+    S: Serialize,
   {
     let target = target.into();
     #[cfg(feature = "tracing")]

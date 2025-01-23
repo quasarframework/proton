@@ -633,7 +633,7 @@ impl<R: Runtime> WebviewManager<R> {
 
     let _ = webview.manager.emit(
       crate::EventName::from_str("tauri://webview-created"),
-      Some(crate::webview::CreatedEvent {
+      &Some(crate::webview::CreatedEvent {
         label: webview.label().into(),
       }),
     );
