@@ -259,9 +259,7 @@ fn on_window_event<R: Runtime>(window: &Window<R>, event: &WindowEvent) -> crate
       }
       _ => unimplemented!(),
     },
-    WindowEvent::ThemeChanged(theme) => {
-      window.emit_to_window(WINDOW_THEME_CHANGED, &theme.to_string())?
-    }
+    WindowEvent::ThemeChanged(theme) => window.emit_to_window(WINDOW_THEME_CHANGED, &theme)?,
   }
   Ok(())
 }
