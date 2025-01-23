@@ -33,10 +33,10 @@ jobs:
       - name: Install dependencies
         run: pnpm i --frozen-lockfile --ignore-scripts
       - name: Build
-        run: pnpm build:cli
+        run: pnpm run build:cli
         shell: bash
       - name: Build
-        run: pnpm build:api
+        run: pnpm run build:api
         shell: bash
       - name: Build API EXE
         run: |
