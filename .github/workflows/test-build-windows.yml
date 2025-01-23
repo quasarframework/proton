@@ -1,0 +1,51 @@
+# Copyright 2019-2024 Tauri Programme within The Commons Conservancy
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: MIT
+
+name: Build EXE for TestDriver
+env:
+  DEBUG: napi:*
+
+on:
+  pull_request:
+
+defaults:
+  run:
+    working-directory: packages/cli/
+
+jobs:
+  build:
+    name: build windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+          architecture: x64
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+      - name: Install dependencies
+        run: pnpm i --frozen-lockfile --ignore-scripts
+      - name: Build
+        run: pnpm build:cli
+        shell: bash
+      - name: Build
+        run: pnpm build:api
+        shell: bash
+      - name: Build API EXE
+        run: |
+          cd examples/api
+          pnpm tauri build
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bindings-x86_64-pc-windows-msvc
+          path: packages/cli/${{ env.APP_NAME }}.*.node
+          if-no-files-found: error
+  
