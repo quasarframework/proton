@@ -130,6 +130,7 @@ bytes = { version = "1", features = ["serde"] }
 reqwest = { version = "0.12", default-features = false, features = [
   "json",
   "stream",
+  "rustls-tls"
 ] }
 
 # android
@@ -184,9 +185,11 @@ objc-exception = ["tauri-runtime-wry/objc-exception"]
 linux-libxdo = ["tray-icon/libxdo", "muda/libxdo"]
 isolation = ["tauri-utils/isolation", "tauri-macros/isolation", "uuid"]
 custom-protocol = ["tauri-macros/custom-protocol"]
+# TODO: Remove these flags in v3 and/or enable them by default behind a mobile flag https://github.com/tauri-apps/tauri/issues/12384
+# For now those feature flags keep enabling reqwest features in case some users depend on that by accident.
 native-tls = ["reqwest/native-tls"]
 native-tls-vendored = ["reqwest/native-tls-vendored"]
-rustls-tls = ["reqwest/rustls-tls"]
+rustls-tls = []
 devtools = ["tauri-runtime/devtools", "tauri-runtime-wry/devtools"]
 process-relaunch-dangerous-allow-symlink-macos = [
   "tauri-utils/process-relaunch-dangerous-allow-symlink-macos",
