@@ -55,13 +55,12 @@ impl JsHandler {
 }
 
 type WebviewLabel = String;
-type EventName = String;
 
 /// Holds event handlers and pending event handlers, along with the salts associating them.
 struct InnerListeners {
   pending: Mutex<Vec<Pending>>,
-  handlers: Mutex<HashMap<EventName, HashMap<EventId, Handler>>>,
-  js_event_listeners: Mutex<HashMap<WebviewLabel, HashMap<EventName, HashSet<JsHandler>>>>,
+  handlers: Mutex<HashMap<crate::EventName, HashMap<EventId, Handler>>>,
+  js_event_listeners: Mutex<HashMap<WebviewLabel, HashMap<crate::EventName, HashSet<JsHandler>>>>,
   function_name: &'static str,
   listeners_object_name: &'static str,
   next_event_id: Arc<AtomicU32>,
@@ -139,10 +138,7 @@ impl Listeners {
     match self.inner.handlers.try_lock() {
       Err(_) => self.insert_pending(Pending::Listen { id, event, handler }),
       Ok(mut lock) => {
-        lock
-          .entry(event.into_inner())
-          .or_default()
-          .insert(id, handler);
+        lock.entry(event).or_default().insert(id, handler);
       }
     }
   }
@@ -200,7 +196,7 @@ impl Listeners {
     match self.inner.handlers.try_lock() {
       Err(_) => self.insert_pending(Pending::Emit(emit_args)),
       Ok(lock) => {
-        if let Some(handlers) = lock.get(emit_args.event.as_str()) {
+        if let Some(handlers) = lock.get(&emit_args.event) {
           let handlers = handlers.iter();
           let handlers = handlers.filter(|(_, h)| match_any_or_filter(&h.target, &filter));
           for (&id, Handler { callback, .. }) in handlers {
@@ -230,24 +226,26 @@ impl Listeners {
     target: EventTarget,
     id: EventId,
   ) {
+    let event = event.into_owned();
     let mut listeners = self.inner.js_event_listeners.lock().unwrap();
     listeners
       .entry(source_webview_label.to_string())
       .or_default()
-      .entry(event.to_string())
+      .entry(event)
       .or_default()
       .insert(JsHandler::new(target, id));
   }
 
   pub(crate) fn unlisten_js(&self, event: crate::EventName<&str>, id: EventId) {
+    let event = event.into_owned();
     let mut js_listeners = self.inner.js_event_listeners.lock().unwrap();
     let js_listeners = js_listeners.values_mut();
     for js_listeners in js_listeners {
-      if let Some(handlers) = js_listeners.get_mut(event.as_str()) {
+      if let Some(handlers) = js_listeners.get_mut(&event) {
         handlers.retain(|h| h.id != id);
 
         if handlers.is_empty() {
-          js_listeners.remove(event.as_str());
+          js_listeners.remove(&event);
         }
       }
     }
@@ -258,10 +256,11 @@ impl Listeners {
     event: crate::EventName<&str>,
     filter: F,
   ) -> bool {
+    let event = event.into_owned();
     let js_listeners = self.inner.js_event_listeners.lock().unwrap();
     js_listeners.values().any(|events| {
       events
-        .get(event.as_str())
+        .get(&event)
         .map(|handlers| handlers.iter().any(|handler| filter(&handler.target)))
         .unwrap_or(false)
     })
@@ -278,9 +277,9 @@ impl Listeners {
     I: Iterator<Item = &'a Webview<R>>,
     F: Fn(&EventTarget) -> bool,
   {
+    let event = &emit_args.event;
     let js_listeners = self.inner.js_event_listeners.lock().unwrap();
     webviews.try_for_each(|webview| {
-      let event = emit_args.event.as_str();
       if let Some(handlers) = js_listeners.get(webview.label()).and_then(|s| s.get(event)) {
         let ids = handlers
           .iter()
@@ -332,13 +331,13 @@ mod test {
       // clone e as the key
       let key = crate::EventName::new(e.clone()).unwrap();
       // pass e and an dummy func into listen
-      listeners.listen(key, EventTarget::Any, event_fn);
+      listeners.listen(key.clone(), EventTarget::Any, event_fn);
 
       // lock mutex
       let l = listeners.inner.handlers.lock().unwrap();
 
       // check if the generated key is in the map
-      assert!(l.contains_key(&e));
+      assert!(l.contains_key(&key));
     }
 
     // check to see if listen inputs a handler function properly into the LISTENERS map.
@@ -347,15 +346,15 @@ mod test {
       let listeners: Listeners = Default::default();
       let key = crate::EventName::new(e.clone()).unwrap();
        // pass e and an dummy func into listen
-       listeners.listen(key, EventTarget::Any, event_fn);
+       listeners.listen(key.clone(), EventTarget::Any, event_fn);
 
        // lock mutex
        let mut l = listeners.inner.handlers.lock().unwrap();
 
        // check if l contains key
-       if l.contains_key(&e) {
+       if l.contains_key(&key) {
         // grab key if it exists
-        let handler = l.get_mut(&e);
+        let handler = l.get_mut(&key);
         // check to see if we get back a handler or not
         match handler {
           // pass on Some(handler)
@@ -380,7 +379,7 @@ mod test {
       let l = listeners.inner.handlers.lock().unwrap();
 
       // assert that the key is contained in the listeners map
-      assert!(l.contains_key(&e));
+      assert!(l.contains_key(&key));
     }
   }
 }
