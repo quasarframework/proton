@@ -25,8 +25,7 @@ use crate::{
   pattern::PatternJavascript,
   sealed::ManagerBase,
   webview::PageLoadPayload,
-  Emitter, EventLoopMessage, EventTarget, Manager, Runtime, Scopes, UriSchemeContext, Webview,
-  Window,
+  EventLoopMessage, EventTarget, Manager, Runtime, Scopes, UriSchemeContext, Webview, Window,
 };
 
 use super::{
@@ -633,8 +632,8 @@ impl<R: Runtime> WebviewManager<R> {
     }
 
     let _ = webview.manager.emit(
-      "tauri://webview-created",
-      Some(crate::webview::CreatedEvent {
+      crate::EventName::from_str("tauri://webview-created"),
+      &Some(crate::webview::CreatedEvent {
         label: webview.label().into(),
       }),
     );
@@ -661,14 +660,20 @@ impl<R: Runtime> WebviewManager<R> {
 
 impl<R: Runtime> Webview<R> {
   /// Emits event to [`EventTarget::Window`] and [`EventTarget::WebviewWindow`]
-  fn emit_to_webview<S: Serialize + Clone>(&self, event: &str, payload: S) -> crate::Result<()> {
+  fn emit_to_webview<S: Serialize + Clone>(
+    &self,
+    event: crate::EventName<&str>,
+    payload: S,
+  ) -> crate::Result<()> {
     let window_label = self.label();
-    self.emit_filter(event, payload, |target| match target {
-      EventTarget::Webview { label } | EventTarget::WebviewWindow { label } => {
-        label == window_label
-      }
-      _ => false,
-    })
+    self
+      .manager()
+      .emit_filter(event, payload, |target| match target {
+        EventTarget::Webview { label } | EventTarget::WebviewWindow { label } => {
+          label == window_label
+        }
+        _ => false,
+      })
   }
 }
 

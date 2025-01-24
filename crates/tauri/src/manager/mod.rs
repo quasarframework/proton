@@ -19,18 +19,18 @@ use tauri_utils::{
   html::{SCRIPT_NONCE_TOKEN, STYLE_NONCE_TOKEN},
 };
 
+use crate::resources::ResourceTable;
 use crate::{
   app::{
     AppHandle, ChannelInterceptor, GlobalWebviewEventListener, GlobalWindowEventListener,
     OnPageLoad,
   },
-  event::{assert_event_name_is_valid, Event, EventId, EventTarget, Listeners},
+  event::{EmitArgs, Event, EventId, EventTarget, Listeners},
   ipc::{Invoke, InvokeHandler, RuntimeAuthority},
   plugin::PluginStore,
   utils::{config::Config, PackageInfo},
-  Assets, Context, Pattern, Runtime, StateManager, Window,
+  Assets, Context, EventName, Pattern, Runtime, StateManager, Webview, Window,
 };
-use crate::{event::EmitArgs, resources::ResourceTable, Webview};
 
 #[cfg(desktop)]
 mod menu;
@@ -507,23 +507,25 @@ impl<R: Runtime> AppManager<R> {
     &self.package_info
   }
 
-  pub fn listen<F: Fn(Event) + Send + 'static>(
+  /// # Panics
+  /// Will panic if `event` contains characters other than alphanumeric, `-`, `/`, `:` and `_`
+  pub(crate) fn listen<F: Fn(Event) + Send + 'static>(
     &self,
-    event: String,
+    event: EventName,
     target: EventTarget,
     handler: F,
   ) -> EventId {
-    assert_event_name_is_valid(&event);
     self.listeners().listen(event, target, handler)
   }
 
-  pub fn once<F: FnOnce(Event) + Send + 'static>(
+  /// # Panics
+  /// Will panic if `event` contains characters other than alphanumeric, `-`, `/`, `:` and `_`
+  pub(crate) fn once<F: FnOnce(Event) + Send + 'static>(
     &self,
-    event: String,
+    event: EventName,
     target: EventTarget,
     handler: F,
   ) -> EventId {
-    assert_event_name_is_valid(&event);
     self.listeners().once(event, target, handler)
   }
 
@@ -535,12 +537,14 @@ impl<R: Runtime> AppManager<R> {
     feature = "tracing",
     tracing::instrument("app::emit", skip(self, payload))
   )]
-  pub fn emit<S: Serialize + Clone>(&self, event: &str, payload: S) -> crate::Result<()> {
-    assert_event_name_is_valid(event);
-
+  pub(crate) fn emit<S: Serialize>(
+    &self,
+    event: EventName<&str>,
+    payload: &S,
+  ) -> crate::Result<()> {
     #[cfg(feature = "tracing")]
     let _span = tracing::debug_span!("emit::run").entered();
-    let emit_args = EmitArgs::new(event, payload)?;
+    let emit_args = EmitArgs::new(event, &payload)?;
 
     let listeners = self.listeners();
     let webviews = self
@@ -550,7 +554,7 @@ impl<R: Runtime> AppManager<R> {
       .cloned()
       .collect::<Vec<_>>();
 
-    listeners.emit_js(webviews.iter(), event, &emit_args)?;
+    listeners.emit_js(webviews.iter(), &emit_args)?;
     listeners.emit(emit_args)?;
 
     Ok(())
@@ -560,22 +564,24 @@ impl<R: Runtime> AppManager<R> {
     feature = "tracing",
     tracing::instrument("app::emit::filter", skip(self, payload, filter))
   )]
-  pub fn emit_filter<S, F>(&self, event: &str, payload: S, filter: F) -> crate::Result<()>
+  pub(crate) fn emit_filter<S, F>(
+    &self,
+    event: EventName<&str>,
+    payload: S,
+    filter: F,
+  ) -> crate::Result<()>
   where
-    S: Serialize + Clone,
+    S: Serialize,
     F: Fn(&EventTarget) -> bool,
   {
-    assert_event_name_is_valid(event);
-
     #[cfg(feature = "tracing")]
     let _span = tracing::debug_span!("emit::run").entered();
-    let emit_args = EmitArgs::new(event, payload)?;
+    let emit_args = EmitArgs::new(event, &payload)?;
 
     let listeners = self.listeners();
 
     listeners.emit_js_filter(
       self.webview.webviews_lock().values(),
-      event,
       &emit_args,
       Some(&filter),
     )?;
@@ -589,10 +595,15 @@ impl<R: Runtime> AppManager<R> {
     feature = "tracing",
     tracing::instrument("app::emit::to", skip(self, target, payload), fields(target))
   )]
-  pub fn emit_to<I, S>(&self, target: I, event: &str, payload: S) -> crate::Result<()>
+  pub(crate) fn emit_to<I, S>(
+    &self,
+    target: I,
+    event: EventName<&str>,
+    payload: &S,
+  ) -> crate::Result<()>
   where
     I: Into<EventTarget>,
-    S: Serialize + Clone,
+    S: Serialize,
   {
     let target = target.into();
     #[cfg(feature = "tracing")]
