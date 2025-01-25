@@ -511,6 +511,17 @@ pub struct Position {
   pub y: u32,
 }
 
+/// Position coordinates struct.
+#[derive(Default, Debug, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "schema", derive(JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct LogicalPosition {
+  /// X coordinate.
+  pub x: f64,
+  /// Y coordinate.
+  pub y: f64,
+}
+
 /// Size of the window.
 #[derive(Default, Debug, PartialEq, Eq, Clone, Deserialize, Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
@@ -1569,6 +1580,11 @@ pub struct WindowConfig {
   /// The style of the macOS title bar.
   #[serde(default, alias = "title-bar-style")]
   pub title_bar_style: TitleBarStyle,
+  /// The position of the window controls on macOS.
+  ///
+  /// Requires titleBarStyle: Overlay and decorations: true.
+  #[serde(default, alias = "traffic-light-position")]
+  pub traffic_light_position: Option<LogicalPosition>,
   /// If `true`, sets the window title to be hidden on macOS.
   #[serde(default, alias = "hidden-title")]
   pub hidden_title: bool,
@@ -1725,6 +1741,7 @@ impl Default for WindowConfig {
       window_classname: None,
       theme: None,
       title_bar_style: Default::default(),
+      traffic_light_position: None,
       hidden_title: false,
       accept_first_mouse: false,
       tabbing_identifier: None,
@@ -2905,6 +2922,13 @@ mod build {
     }
   }
 
+  impl ToTokens for LogicalPosition {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+      let LogicalPosition { x, y } = self;
+      literal_struct!(tokens, ::tauri::utils::config::LogicalPosition, x, y)
+    }
+  }
+
   impl ToTokens for crate::WindowEffect {
     fn to_tokens(&self, tokens: &mut TokenStream) {
       let prefix = quote! { ::tauri::utils::WindowEffect };
@@ -2991,6 +3015,7 @@ mod build {
       let window_classname = opt_str_lit(self.window_classname.as_ref());
       let theme = opt_lit(self.theme.as_ref());
       let title_bar_style = &self.title_bar_style;
+      let traffic_light_position = opt_lit(self.traffic_light_position.as_ref());
       let hidden_title = self.hidden_title;
       let accept_first_mouse = self.accept_first_mouse;
       let tabbing_identifier = opt_str_lit(self.tabbing_identifier.as_ref());
@@ -3042,6 +3067,7 @@ mod build {
         window_classname,
         theme,
         title_bar_style,
+        traffic_light_position,
         hidden_title,
         accept_first_mouse,
         tabbing_identifier,

@@ -423,6 +423,13 @@ pub trait WindowBuilder: WindowBuilderBase {
   #[must_use]
   fn title_bar_style(self, style: tauri_utils::TitleBarStyle) -> Self;
 
+  /// Change the position of the window controls on macOS.
+  ///
+  /// Requires titleBarStyle: Overlay and decorations: true.
+  #[cfg(target_os = "macos")]
+  #[must_use]
+  fn traffic_light_position(self, x: f64, y: f64) -> Self;
+
   /// Hide the window title.
   #[cfg(target_os = "macos")]
   #[must_use]

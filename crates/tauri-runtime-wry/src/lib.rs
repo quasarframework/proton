@@ -787,6 +787,9 @@ impl WindowBuilder for WindowBuilderWrapper {
       if let Some(identifier) = &config.tabbing_identifier {
         window = window.tabbing_identifier(identifier);
       }
+      if let Some(position) = &config.traffic_light_position {
+        window = window.traffic_light_position(position.x, position.y);
+      }
     }
 
     #[cfg(any(not(target_os = "macos"), feature = "macos-private-api"))]
@@ -1069,6 +1072,14 @@ impl WindowBuilder for WindowBuilderWrapper {
   }
 
   #[cfg(target_os = "macos")]
+  fn traffic_light_position(mut self, x: f64, y: f64) -> Self {
+    self.inner = self
+      .inner
+      .with_traffic_light_inset(TaoLogicalPosition::new(x, y));
+    self
+  }
+
+  #[cfg(target_os = "macos")]
   fn hidden_title(mut self, hidden: bool) -> Self {
     self.inner = self.inner.with_title_hidden(hidden);
     self
@@ -1270,6 +1281,7 @@ pub enum WindowMessage {
   SetOverlayIcon(Option<TaoIcon>),
   SetProgressBar(ProgressBarState),
   SetTitleBarStyle(tauri_utils::TitleBarStyle),
+  SetTrafficLightPosition(Position),
   SetTheme(Option<Theme>),
   SetBackgroundColor(Option<Color>),
   DragWindow,
@@ -2170,6 +2182,16 @@ impl<T: UserEvent> WindowDispatch<T> for WryWindowDispatcher<T> {
     send_user_message(
       &self.context,
       Message::Window(self.window_id, WindowMessage::SetTitleBarStyle(style)),
+    )
+  }
+
+  fn set_traffic_light_position(&self, position: Position) -> Result<()> {
+    send_user_message(
+      &self.context,
+      Message::Window(
+        self.window_id,
+        WindowMessage::SetTrafficLightPosition(position),
+      ),
     )
   }
 
@@ -3179,6 +3201,10 @@ fn handle_user_message<T: UserEvent>(
                 eprintln!("unknown title bar style applied: {unknown}");
               }
             };
+          }
+          WindowMessage::SetTrafficLightPosition(_position) => {
+            #[cfg(target_os = "macos")]
+            window.set_traffic_light_inset(_position);
           }
           WindowMessage::SetTheme(theme) => {
             window.set_theme(match theme {
@@ -4357,6 +4383,14 @@ fn create_webview<T: UserEvent>(
   {
     if let Some(data_store_identifier) = &webview_attributes.data_store_identifier {
       webview_builder = webview_builder.with_data_store_identifier(*data_store_identifier);
+    }
+  }
+
+  #[cfg(target_os = "macos")]
+  {
+    use wry::WebViewBuilderExtDarwin;
+    if let Some(position) = &webview_attributes.traffic_light_position {
+      webview_builder = webview_builder.with_traffic_light_inset(*position);
     }
   }
 

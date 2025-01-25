@@ -235,7 +235,7 @@ pub enum RunEvent<T: UserEvent> {
   Resumed,
   /// Emitted when all of the event loop's input events have been processed and redraw processing is about to begin.
   ///
-  /// This event is useful as a place to put your code that should be run after all state-changing events have been handled and you want to do stuff (updating state, performing calculations, etc) that happens as the “main body” of your event loop.
+  /// This event is useful as a place to put your code that should be run after all state-changing events have been handled and you want to do stuff (updating state, performing calculations, etc) that happens as the "main body" of your event loop.
   MainEventsCleared,
   /// Emitted when the user wants to open the specified resource with the app.
   #[cfg(any(target_os = "macos", target_os = "ios"))]
@@ -846,6 +846,15 @@ pub trait WindowDispatch<T: UserEvent>: Debug + Clone + Send + Sync + Sized + 's
   ///
   /// - **Linux / Windows / iOS / Android:** Unsupported.
   fn set_title_bar_style(&self, style: tauri_utils::TitleBarStyle) -> Result<()>;
+
+  /// Change the position of the window controls. Available on macOS only.
+  ///
+  /// Requires titleBarStyle: Overlay and decorations: true.
+  ///
+  /// ## Platform-specific
+  ///
+  /// - **Linux / Windows / iOS / Android:** Unsupported.
+  fn set_traffic_light_position(&self, position: Position) -> Result<()>;
 
   /// Sets the theme for this window.
   ///

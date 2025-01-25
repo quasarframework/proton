@@ -215,6 +215,7 @@ pub struct WebviewAttributes {
   pub use_https_scheme: bool,
   pub devtools: Option<bool>,
   pub background_color: Option<Color>,
+  pub traffic_light_position: Option<dpi::Position>,
 }
 
 impl From<&WindowConfig> for WebviewAttributes {
@@ -229,6 +230,13 @@ impl From<&WindowConfig> for WebviewAttributes {
     #[cfg(any(not(target_os = "macos"), feature = "macos-private-api"))]
     {
       builder = builder.transparent(config.transparent);
+    }
+    #[cfg(target_os = "macos")]
+    {
+      if let Some(position) = &config.traffic_light_position {
+        builder =
+          builder.traffic_light_position(dpi::LogicalPosition::new(position.x, position.y).into());
+      }
     }
     builder = builder.accept_first_mouse(config.accept_first_mouse);
     if !config.drag_drop_enabled {
@@ -279,6 +287,7 @@ impl WebviewAttributes {
       use_https_scheme: false,
       devtools: None,
       background_color: None,
+      traffic_light_position: None,
     }
   }
 
@@ -442,6 +451,19 @@ impl WebviewAttributes {
   #[must_use]
   pub fn background_color(mut self, color: Color) -> Self {
     self.background_color = Some(color);
+    self
+  }
+
+  /// Change the position of the window controls. Available on macOS only.
+  ///
+  /// Requires titleBarStyle: Overlay and decorations: true.
+  ///
+  /// ## Platform-specific
+  ///
+  /// - **Linux / Windows / iOS / Android:** Unsupported.
+  #[must_use]
+  pub fn traffic_light_position(mut self, position: dpi::Position) -> Self {
+    self.traffic_light_position = Some(position);
     self
   }
 }
