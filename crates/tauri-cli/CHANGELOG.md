@@ -1,5 +1,11 @@
 # Changelog
 
+## \[2.2.7]
+
+### Bug Fixes
+
+- [`8e9134c4a`](https://www.github.com/tauri-apps/tauri/commit/8e9134c4a2047329be0dbb868b7ae061a9d3f190) ([#12511](https://www.github.com/tauri-apps/tauri/pull/12511) by [@FabianLars](https://www.github.com/tauri-apps/tauri/../../FabianLars)) Fixed an issue that caused `tauri dev` to fail because of an incorrect `--bins` flag.
+
 ## \[2.2.6]
 
 ### Enhancements
