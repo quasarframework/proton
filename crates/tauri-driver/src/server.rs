@@ -54,7 +54,6 @@ impl TauriOptions {
     ms_edge_options.insert("binary".into(), json!(self.application));
     ms_edge_options.insert("args".into(), self.args.into());
 
-    #[cfg(target_os = "windows")]
     if let Some(webview_options) = self.webview_options {
       ms_edge_options.insert("webviewOptions".into(), webview_options);
     }
