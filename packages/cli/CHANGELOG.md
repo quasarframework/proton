@@ -1,5 +1,16 @@
 # Changelog
 
+## \[2.2.6]
+
+### Enhancements
+
+- [`1a86974aa`](https://www.github.com/tauri-apps/tauri/commit/1a86974aa3d09957c6b1142a17bbfed9998798fd) ([#12406](https://www.github.com/tauri-apps/tauri/pull/12406) by [@bradleat](https://www.github.com/tauri-apps/tauri/../../bradleat)) `ios build --open` will now let xcode start the rust build process.
+- [`0b79af711`](https://www.github.com/tauri-apps/tauri/commit/0b79af711430934362602fb950c3e4cb5b59cf9c) ([#12438](https://www.github.com/tauri-apps/tauri/pull/12438) by [@3lpsy](https://www.github.com/tauri-apps/tauri/../../3lpsy)) Log the command used to start the rust app in development.
+
+### Dependencies
+
+- Upgraded to `tauri-cli@2.2.6`
+
 ## \[2.2.5]
 
 ### Dependencies

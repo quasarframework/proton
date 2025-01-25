@@ -1,5 +1,22 @@
 # Changelog
 
+## \[2.2.6]
+
+### Enhancements
+
+- [`1a86974aa`](https://www.github.com/tauri-apps/tauri/commit/1a86974aa3d09957c6b1142a17bbfed9998798fd) ([#12406](https://www.github.com/tauri-apps/tauri/pull/12406) by [@bradleat](https://www.github.com/tauri-apps/tauri/../../bradleat)) `ios build --open` will now let xcode start the rust build process.
+- [`9a30bed98`](https://www.github.com/tauri-apps/tauri/commit/9a30bed98c2d8501328006fad5840eb9d533e1c2) ([#12423](https://www.github.com/tauri-apps/tauri/pull/12423) by [@tr3ysmith](https://www.github.com/tauri-apps/tauri/../../tr3ysmith)) Added conditional logic to MacOS codesigning where only executables get the entitlements file when being signed. This solves an issue where the app may not launch when using 3rd party frameworks if certain entitlements are added. Ex: multicast support (must be applied for through apple developer, and the framework would not have that capability).
+- [`0b79af711`](https://www.github.com/tauri-apps/tauri/commit/0b79af711430934362602fb950c3e4cb5b59cf9c) ([#12438](https://www.github.com/tauri-apps/tauri/pull/12438) by [@3lpsy](https://www.github.com/tauri-apps/tauri/../../3lpsy)) Log the command used to start the rust app in development.
+
+### Bug Fixes
+
+- [`bc43c738b`](https://www.github.com/tauri-apps/tauri/commit/bc43c738baf686353690d3d9259b4976881718c8) ([#12442](https://www.github.com/tauri-apps/tauri/pull/12442) by [@FabianLars](https://www.github.com/tauri-apps/tauri/../../FabianLars)) Fixed an issue that prevented `tauri add` to work for the `clipboard-manager` plugin.
+- [`27096cdc0`](https://www.github.com/tauri-apps/tauri/commit/27096cdc05d89b61b2372b4e4a3018c87f240ab8) ([#12445](https://www.github.com/tauri-apps/tauri/pull/12445) by [@FabianLars](https://www.github.com/tauri-apps/tauri/../../FabianLars)) Fixed an issue that caused Tauri's CLI to enable tauri's `native-tls` feature even though it wasn't needed. Moved `reqwest` to a mobile-only dependency in `tauri` and enabled its `rustls-tls` feature flag.
+
+### Dependencies
+
+- Upgraded to `tauri-bundler@2.2.3`
+
 ## \[2.2.5]
 
 ### Dependencies

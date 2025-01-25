@@ -1,5 +1,11 @@
 # Changelog
 
+## \[2.2.4]
+
+### Bug Fixes
+
+- [`27096cdc0`](https://www.github.com/tauri-apps/tauri/commit/27096cdc05d89b61b2372b4e4a3018c87f240ab8) ([#12445](https://www.github.com/tauri-apps/tauri/pull/12445) by [@FabianLars](https://www.github.com/tauri-apps/tauri/../../FabianLars)) Fixed an issue that caused Tauri's CLI to enable tauri's `native-tls` feature even though it wasn't needed. Moved `reqwest` to a mobile-only dependency in `tauri` and enabled its `rustls-tls` feature flag.
+
 ## \[2.2.3]
 
 ### Bug Fixes
