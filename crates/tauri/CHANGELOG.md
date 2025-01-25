@@ -1,5 +1,17 @@
 # Changelog
 
+## \[2.2.5]
+
+### Bug Fixes
+
+- [`477e9c049`](https://www.github.com/tauri-apps/tauri/commit/477e9c0496ff75ef8ef7aedc5430c77e213cd740) ([#12514](https://www.github.com/tauri-apps/tauri/pull/12514) by [@FabianLars](https://www.github.com/tauri-apps/tauri/../../FabianLars)) Fixed an issue that caused iOS apps to panic when using an async function for `tauri::mobile_entry_point`.
+
+## \[2.2.4]
+
+### Bug Fixes
+
+- [`27096cdc0`](https://www.github.com/tauri-apps/tauri/commit/27096cdc05d89b61b2372b4e4a3018c87f240ab8) ([#12445](https://www.github.com/tauri-apps/tauri/pull/12445) by [@FabianLars](https://www.github.com/tauri-apps/tauri/../../FabianLars)) Fixed an issue that caused Tauri's CLI to enable tauri's `native-tls` feature even though it wasn't needed. Moved `reqwest` to a mobile-only dependency in `tauri` and enabled its `rustls-tls` feature flag.
+
 ## \[2.2.3]
 
 ### Bug Fixes

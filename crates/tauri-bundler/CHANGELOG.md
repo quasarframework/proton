@@ -1,5 +1,18 @@
 # Changelog
 
+## \[2.2.3]
+
+### Bug Fixes
+
+- [`de8600b4d`](https://www.github.com/tauri-apps/tauri/commit/de8600b4d9a04e809e078c8aea61825d1328201f) ([#12471](https://www.github.com/tauri-apps/tauri/pull/12471) by [@anatawa12](https://www.github.com/tauri-apps/tauri/../../anatawa12)) Bumped `nsis-tauri-utils` to `0.4.2` which fixes the following bugs:
+
+  - Fixed launch on start checkbox in nsis installer does not work well with applications that require elevated permissions
+  - Fixed nsis installer may fail to install if launched by updater plugin
+- [`fbe7c9ead`](https://www.github.com/tauri-apps/tauri/commit/fbe7c9ead76e71ca258c6f48bbb62185fcc37b1c) ([#12466](https://www.github.com/tauri-apps/tauri/pull/12466) by [@FabianLars](https://www.github.com/tauri-apps/tauri/../../FabianLars)) Fixed an issue that caused the compiled AppImage to miss webkitgtk's internal `libwebkit2gtkinjectedbundle.so` file.
+- [`f5a59b93b`](https://www.github.com/tauri-apps/tauri/commit/f5a59b93bfefb43ff131a7870b3c5d5e48c1ca1e) ([#12136](https://www.github.com/tauri-apps/tauri/pull/12136) by [@unknovvn](https://www.github.com/tauri-apps/tauri/../../unknovvn)) The NSIS bundler will now replace non-numeric build metadata with `0` instead of returning an error.
+- [`9dac2863a`](https://www.github.com/tauri-apps/tauri/commit/9dac2863afa70fb0bcddf859b284afba917f28ae) ([#12323](https://www.github.com/tauri-apps/tauri/pull/12323) by [@FabianLars](https://www.github.com/tauri-apps/tauri/../../FabianLars)) Skip signing the .dmg if self signing via `"signingIdentity": "-"` is used.
+- [`b8eb28877`](https://www.github.com/tauri-apps/tauri/commit/b8eb28877fe822dbe17999fc8af98ed7d0983679) ([#12427](https://www.github.com/tauri-apps/tauri/pull/12427) by [@Legend-Master](https://www.github.com/tauri-apps/tauri/../../Legend-Master)) Clean up `Software\${MANUFACTURER}\${PRODUCTNAME}` registry key in the NSIS uninstaller if "Delete application data" option is checked when uninstalling.
+
 ## \[2.2.2]
 
 ### Bug Fixes

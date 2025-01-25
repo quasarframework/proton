@@ -1,5 +1,26 @@
 # Changelog
 
+## \[2.2.7]
+
+### Bug Fixes
+
+- [`8e9134c4a`](https://www.github.com/tauri-apps/tauri/commit/8e9134c4a2047329be0dbb868b7ae061a9d3f190) ([#12511](https://www.github.com/tauri-apps/tauri/pull/12511) by [@FabianLars](https://www.github.com/tauri-apps/tauri/../../FabianLars)) Fixed an issue that caused `tauri dev` to fail because of an incorrect `--bins` flag.
+
+### Dependencies
+
+- Upgraded to `tauri-cli@2.2.7`
+
+## \[2.2.6]
+
+### Enhancements
+
+- [`1a86974aa`](https://www.github.com/tauri-apps/tauri/commit/1a86974aa3d09957c6b1142a17bbfed9998798fd) ([#12406](https://www.github.com/tauri-apps/tauri/pull/12406) by [@bradleat](https://www.github.com/tauri-apps/tauri/../../bradleat)) `ios build --open` will now let xcode start the rust build process.
+- [`0b79af711`](https://www.github.com/tauri-apps/tauri/commit/0b79af711430934362602fb950c3e4cb5b59cf9c) ([#12438](https://www.github.com/tauri-apps/tauri/pull/12438) by [@3lpsy](https://www.github.com/tauri-apps/tauri/../../3lpsy)) Log the command used to start the rust app in development.
+
+### Dependencies
+
+- Upgraded to `tauri-cli@2.2.6`
+
 ## \[2.2.5]
 
 ### Dependencies
