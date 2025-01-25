@@ -1,5 +1,11 @@
 # Changelog
 
+## \[2.2.5]
+
+### Bug Fixes
+
+- [`477e9c049`](https://www.github.com/tauri-apps/tauri/commit/477e9c0496ff75ef8ef7aedc5430c77e213cd740) ([#12514](https://www.github.com/tauri-apps/tauri/pull/12514) by [@FabianLars](https://www.github.com/tauri-apps/tauri/../../FabianLars)) Fixed an issue that caused iOS apps to panic with an async `run()` entrypoint.
+
 ## \[2.2.4]
 
 ### Bug Fixes
