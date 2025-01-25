@@ -382,8 +382,6 @@ fn dev_options(
 
   if mobile {
     args.push("--lib".into());
-  } else {
-    args.push("--bins".into());
   }
 
   if !args.contains(&"--no-default-features".into()) {
@@ -466,6 +464,8 @@ impl Rust {
       .push("tauri/custom-protocol".into());
     if mobile {
       args.push("--lib".into());
+    } else {
+      args.push("--bins".into());
     }
   }
 
