@@ -360,35 +360,6 @@ fn lookup<F: FnMut(FileType, PathBuf)>(dir: &Path, mut f: F) {
   }
 }
 
-fn shared_options(
-  desktop_dev: bool,
-  mobile: bool,
-  args: &mut Vec<String>,
-  features: &mut Option<Vec<String>>,
-  app_settings: &RustAppSettings,
-) {
-  if mobile {
-    args.push("--lib".into());
-    features
-      .get_or_insert(Vec::new())
-      .push("tauri/rustls-tls".into());
-  } else {
-    if !desktop_dev {
-      args.push("--bins".into());
-    }
-    let all_features = app_settings
-      .manifest
-      .lock()
-      .unwrap()
-      .all_enabled_features(if let Some(f) = features { f } else { &[] });
-    if !all_features.contains(&"tauri/rustls-tls".into()) {
-      features
-        .get_or_insert(Vec::new())
-        .push("tauri/native-tls".into());
-    }
-  }
-}
-
 fn dev_options(
   mobile: bool,
   args: &mut Vec<String>,
@@ -409,7 +380,11 @@ fn dev_options(
   }
   *args = dev_args;
 
-  shared_options(true, mobile, args, features, app_settings);
+  if mobile {
+    args.push("--lib".into());
+  } else {
+    args.push("--bins".into());
+  }
 
   if !args.contains(&"--no-default-features".into()) {
     let manifest_features = app_settings.manifest.lock().unwrap().features();
@@ -489,7 +464,9 @@ impl Rust {
     features
       .get_or_insert(Vec::new())
       .push("tauri/custom-protocol".into());
-    shared_options(false, mobile, args, features, &self.app_settings);
+    if mobile {
+      args.push("--lib".into());
+    }
   }
 
   fn run_dev<F: Fn(Option<i32>, ExitReason) + Send + Sync + 'static>(

@@ -35,8 +35,8 @@ use crate::{
   },
   manager::AppManager,
   sealed::{ManagerBase, RuntimeOrDispatch},
-  AppHandle, Emitter, Event, EventId, EventLoopMessage, Listener, Manager, ResourceTable, Runtime,
-  Window,
+  AppHandle, Emitter, Event, EventId, EventLoopMessage, EventName, Listener, Manager,
+  ResourceTable, Runtime, Window,
 };
 
 use std::{
@@ -1491,7 +1491,7 @@ fn main() {
   /// Register a JS event listener and return its identifier.
   pub(crate) fn listen_js(
     &self,
-    event: &str,
+    event: EventName<&str>,
     target: EventTarget,
     handler: CallbackFn,
   ) -> crate::Result<EventId> {
@@ -1513,7 +1513,7 @@ fn main() {
   }
 
   /// Unregister a JS event listener.
-  pub(crate) fn unlisten_js(&self, event: &str, id: EventId) -> crate::Result<()> {
+  pub(crate) fn unlisten_js(&self, event: EventName<&str>, id: EventId) -> crate::Result<()> {
     let listeners = self.manager().listeners();
 
     self.eval(&crate::event::unlisten_js_script(
@@ -1711,8 +1711,9 @@ tauri::Builder::default()
   where
     F: Fn(Event) + Send + 'static,
   {
+    let event = EventName::new(event.into()).unwrap();
     self.manager.listen(
-      event.into(),
+      event,
       EventTarget::Webview {
         label: self.label().to_string(),
       },
@@ -1727,8 +1728,9 @@ tauri::Builder::default()
   where
     F: FnOnce(Event) + Send + 'static,
   {
+    let event = EventName::new(event.into()).unwrap();
     self.manager.once(
-      event.into(),
+      event,
       EventTarget::Webview {
         label: self.label().to_string(),
       },
@@ -1770,94 +1772,7 @@ tauri::Builder::default()
   }
 }
 
-impl<R: Runtime> Emitter<R> for Webview<R> {
-  /// Emits an event to all [targets](EventTarget).
-  ///
-  /// # Examples
-  #[cfg_attr(
-    feature = "unstable",
-    doc = r####"
-```
-use tauri::Emitter;
-
-#[tauri::command]
-fn synchronize(webview: tauri::Webview) {
-  // emits the synchronized event to all webviews
-  webview.emit("synchronized", ());
-}
-  ```
-  "####
-  )]
-  fn emit<S: Serialize + Clone>(&self, event: &str, payload: S) -> crate::Result<()> {
-    self.manager.emit(event, payload)
-  }
-
-  /// Emits an event to all [targets](EventTarget) matching the given target.
-  ///
-  /// # Examples
-  #[cfg_attr(
-    feature = "unstable",
-    doc = r####"
-```
-use tauri::{Emitter, EventTarget};
-
-#[tauri::command]
-fn download(webview: tauri::Webview) {
-  for i in 1..100 {
-    std::thread::sleep(std::time::Duration::from_millis(150));
-    // emit a download progress event to all listeners
-    webview.emit_to(EventTarget::any(), "download-progress", i);
-    // emit an event to listeners that used App::listen or AppHandle::listen
-    webview.emit_to(EventTarget::app(), "download-progress", i);
-    // emit an event to any webview/window/webviewWindow matching the given label
-    webview.emit_to("updater", "download-progress", i); // similar to using EventTarget::labeled
-    webview.emit_to(EventTarget::labeled("updater"), "download-progress", i);
-    // emit an event to listeners that used WebviewWindow::listen
-    webview.emit_to(EventTarget::webview_window("updater"), "download-progress", i);
-  }
-}
-```
-"####
-  )]
-  fn emit_to<I, S>(&self, target: I, event: &str, payload: S) -> crate::Result<()>
-  where
-    I: Into<EventTarget>,
-    S: Serialize + Clone,
-  {
-    self.manager.emit_to(target, event, payload)
-  }
-
-  /// Emits an event to all [targets](EventTarget) based on the given filter.
-  ///
-  /// # Examples
-  #[cfg_attr(
-    feature = "unstable",
-    doc = r####"
-```
-use tauri::{Emitter, EventTarget};
-
-#[tauri::command]
-fn download(webview: tauri::Webview) {
-  for i in 1..100 {
-    std::thread::sleep(std::time::Duration::from_millis(150));
-    // emit a download progress event to the updater window
-    webview.emit_filter("download-progress", i, |t| match t {
-      EventTarget::WebviewWindow { label } => label == "main",
-      _ => false,
-    });
-  }
-}
-  ```
-  "####
-  )]
-  fn emit_filter<S, F>(&self, event: &str, payload: S, filter: F) -> crate::Result<()>
-  where
-    S: Serialize + Clone,
-    F: Fn(&EventTarget) -> bool,
-  {
-    self.manager.emit_filter(event, payload, filter)
-  }
-}
+impl<R: Runtime> Emitter<R> for Webview<R> {}
 
 impl<R: Runtime> Manager<R> for Webview<R> {
   fn resources_table(&self) -> MutexGuard<'_, ResourceTable> {

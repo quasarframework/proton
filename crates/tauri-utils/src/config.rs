@@ -1239,7 +1239,7 @@ pub struct BundleConfig {
   pub long_description: Option<String>,
   /// Whether to use the project's `target` directory, for caching build tools (e.g., Wix and NSIS) when building this application. Defaults to `false`.
   ///
-  /// If true, tools will be cached in `target\.tauri-tools`.
+  /// If true, tools will be cached in `target/.tauri/`.
   /// If false, tools will be cached in the current user's platform-specific cache directory.
   ///
   /// An example where it can be appropriate to set this to `true` is when building this application as a Windows System user (e.g., AWS EC2 workloads),

@@ -208,6 +208,7 @@ pub use runtime::ActivationPolicy;
 #[cfg(target_os = "macos")]
 pub use self::utils::TitleBarStyle;
 
+use self::event::EventName;
 pub use self::event::{Event, EventId, EventTarget};
 pub use {
   self::app::{
@@ -837,6 +838,8 @@ pub trait Listener<R: Runtime>: sealed::ManagerBase<R> {
   ///   })
   ///   .invoke_handler(tauri::generate_handler![synchronize]);
   /// ```
+  /// # Panics
+  /// Will panic if `event` contains characters other than alphanumeric, `-`, `/`, `:` and `_`
   fn listen<F>(&self, event: impl Into<String>, handler: F) -> EventId
   where
     F: Fn(Event) + Send + 'static;
@@ -844,6 +847,8 @@ pub trait Listener<R: Runtime>: sealed::ManagerBase<R> {
   /// Listen to an event on this manager only once.
   ///
   /// See [`Self::listen`] for more information.
+  /// # Panics
+  /// Will panic if `event` contains characters other than alphanumeric, `-`, `/`, `:` and `_`
   fn once<F>(&self, event: impl Into<String>, handler: F) -> EventId
   where
     F: FnOnce(Event) + Send + 'static;
@@ -895,23 +900,27 @@ pub trait Listener<R: Runtime>: sealed::ManagerBase<R> {
   ///   })
   ///   .invoke_handler(tauri::generate_handler![synchronize]);
   /// ```
+  /// # Panics
+  /// Will panic if `event` contains characters other than alphanumeric, `-`, `/`, `:` and `_`
   fn listen_any<F>(&self, event: impl Into<String>, handler: F) -> EventId
   where
     F: Fn(Event) + Send + 'static,
   {
-    self
-      .manager()
-      .listen(event.into(), EventTarget::Any, handler)
+    let event = EventName::new(event.into()).unwrap();
+    self.manager().listen(event, EventTarget::Any, handler)
   }
 
   /// Listens once to an emitted event to any [target](EventTarget) .
   ///
   /// See [`Self::listen_any`] for more information.
+  /// # Panics
+  /// Will panic if `event` contains characters other than alphanumeric, `-`, `/`, `:` and `_`
   fn once_any<F>(&self, event: impl Into<String>, handler: F) -> EventId
   where
     F: FnOnce(Event) + Send + 'static,
   {
-    self.manager().once(event.into(), EventTarget::Any, handler)
+    let event = EventName::new(event.into()).unwrap();
+    self.manager().once(event, EventTarget::Any, handler)
   }
 }
 
@@ -929,7 +938,10 @@ pub trait Emitter<R: Runtime>: sealed::ManagerBase<R> {
   ///   app.emit("synchronized", ());
   /// }
   /// ```
-  fn emit<S: Serialize + Clone>(&self, event: &str, payload: S) -> Result<()>;
+  fn emit<S: Serialize + Clone>(&self, event: &str, payload: S) -> Result<()> {
+    let event = EventName::new(event)?;
+    self.manager().emit(event, &payload)
+  }
 
   /// Emits an event to all [targets](EventTarget) matching the given target.
   ///
@@ -956,7 +968,11 @@ pub trait Emitter<R: Runtime>: sealed::ManagerBase<R> {
   fn emit_to<I, S>(&self, target: I, event: &str, payload: S) -> Result<()>
   where
     I: Into<EventTarget>,
-    S: Serialize + Clone;
+    S: Serialize + Clone,
+  {
+    let event = EventName::new(event)?;
+    self.manager().emit_to(target, event, &payload)
+  }
 
   /// Emits an event to all [targets](EventTarget) based on the given filter.
   ///
@@ -979,7 +995,11 @@ pub trait Emitter<R: Runtime>: sealed::ManagerBase<R> {
   fn emit_filter<S, F>(&self, event: &str, payload: S, filter: F) -> Result<()>
   where
     S: Serialize + Clone,
-    F: Fn(&EventTarget) -> bool;
+    F: Fn(&EventTarget) -> bool,
+  {
+    let event = EventName::new(event)?;
+    self.manager().emit_filter(event, &payload, filter)
+  }
 }
 
 /// Prevent implementation details from leaking out of the [`Manager`] trait.

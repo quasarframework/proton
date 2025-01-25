@@ -1,5 +1,11 @@
 # Changelog
 
+## \[2.2.3]
+
+### Bug Fixes
+
+- [`d2c8f0eb5`](https://www.github.com/tauri-apps/tauri/commit/d2c8f0eb5ce2a5ebacd857614b7c89bbd5c9dca4) ([#12424](https://www.github.com/tauri-apps/tauri/pull/12424) by [@mattyg](https://www.github.com/tauri-apps/tauri/../../mattyg)) Ensure that tauri's builtin initialization scripts and plugin initialization scripts are executed before any user-added initialization scripts in a webview.
+
 ## \[2.2.2]
 
 ### Bug Fixes
