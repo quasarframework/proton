@@ -100,7 +100,7 @@ encoding_rs = "0.8"
 sys-locale = { version = "0.3", optional = true }
 tracing = { version = "0.1", optional = true }
 indexmap = { version = "1", features = [ "std", "serde" ], optional = true }
-getrandom = { version = "0.2", features = [ "std" ] }
+getrandom = { version = "0.3", features = [ "std" ] }
 log = "0.4"
 
 [target."cfg(any(target_os = \"macos\", windows, target_os = \"linux\", target_os = \"dragonfly\", target_os = \"freebsd\", target_os = \"openbsd\", target_os = \"netbsd\"))".dependencies]
