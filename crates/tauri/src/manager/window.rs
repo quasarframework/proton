@@ -253,9 +253,11 @@ fn on_window_event<R: Runtime>(window: &Window<R>, event: &WindowEvent) -> crate
       DragDropEvent::Leave => {
         if window.is_webview_window() {
           // use underlying manager, otherwise have to recheck EventName
-          window
-            .manager()
-            .emit_to(EventTarget::labeled(window.label()), DRAG_LEAVE_EVENT, EmitPayload::Serialize(&()))?
+          window.manager().emit_to(
+            EventTarget::labeled(window.label()),
+            DRAG_LEAVE_EVENT,
+            EmitPayload::Serialize(&()),
+          )?
         } else {
           window.emit_to_window(DRAG_LEAVE_EVENT, &())?
         }
