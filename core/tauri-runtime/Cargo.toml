@@ -35,7 +35,7 @@ uuid = { version = "1", features = [ "v4" ] }
 http = "0.2"
 http-range = "0.1"
 raw-window-handle = "0.5"
-rand = "0.8"
+rand = "0.9"
 url = { version = "2" }
 
 [target."cfg(windows)".dependencies]

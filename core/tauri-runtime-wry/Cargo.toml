@@ -17,7 +17,7 @@ wry = { version = "0.24.10", default-features = false, features = [ "file-drop",
 tauri-runtime = { version = "0.14.6", path = "../tauri-runtime" }
 tauri-utils = { version = "1.6.2", path = "../tauri-utils" }
 uuid = { version = "1", features = [ "v4" ] }
-rand = "0.8"
+rand = "0.9"
 raw-window-handle = "0.5"
 tracing = { version = "0.1", optional = true }
 arboard = { version = "3", optional = true }

@@ -66,7 +66,7 @@ tauri-runtime = { version = "0.14.6", path = "../tauri-runtime" }
 tauri-macros = { version = "1.4.7", path = "../tauri-macros" }
 tauri-utils = { version = "1.6.2", features = [ "resources" ], path = "../tauri-utils" }
 tauri-runtime-wry = { version = "0.14.11", path = "../tauri-runtime-wry", optional = true }
-rand = "0.8"
+rand = "0.9"
 semver = { version = "1", features = [ "serde" ] }
 serde_repr = "0.1"
 state = "0.5" # 0.6 raised msrv
