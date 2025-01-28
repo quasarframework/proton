@@ -87,7 +87,11 @@ pub fn restart(env: &Env) {
     #[cfg(target_os = "macos")]
     restart_macos_app(&path, env);
 
-    if let Err(e) = Command::new(path).args(&env.args).spawn() {
+    // Copy the existing command line arguments and add the "restart" argument to the beginning
+    let mut args = vec!["restart_from_tauri_api".to_string()]; 
+    args.extend(env.args.iter().cloned()); 
+
+    if let Err(e) = Command::new(path).args(&args).spawn() {
       log::error!("failed to restart app: {e}");
     }
   }
