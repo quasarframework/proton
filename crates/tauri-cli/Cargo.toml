@@ -75,7 +75,7 @@ handlebars = "6"
 include_dir = "0.7"
 minisign = "=0.7.3"
 base64 = "0.22"
-ureq = { version = "2", default-features = false, features = ["gzip"] }
+ureq = { version = "3", default-features = false, features = ["gzip"] }
 os_info = "3"
 semver = "1"
 regex = "1"
