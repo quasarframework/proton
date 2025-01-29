@@ -1491,7 +1491,7 @@ dependencies = [
  "deunicode",
  "duct",
  "dunce",
- "embed-resource",
+ "embed-resource 2.5.1",
  "english-numbers",
  "freedesktop_entry_parser",
  "handlebars",
@@ -2697,6 +2697,20 @@ name = "embed-resource"
 version = "2.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b68b6f9f63a0b6a38bc447d4ce84e2b388f3ec95c99c641c8ff0dd3ef89a6379"
+dependencies = [
+ "cc",
+ "memchr",
+ "rustc_version",
+ "toml 0.8.19",
+ "vswhom",
+ "winreg 0.52.0",
+]
+
+[[package]]
+name = "embed-resource"
+version = "3.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4762ce03154ba57ebaeee60cc631901ceae4f18219cbb874e464347471594742"
 dependencies = [
  "cc",
  "memchr",
@@ -9561,11 +9575,11 @@ dependencies = [
 
 [[package]]
 name = "tauri-winres"
-version = "0.2.0"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ff389a3b73a46a4537e17dfce42061c4f0c31be9fbb4f87e49150b94e3e26377"
+checksum = "56eaa45f707bedf34d19312c26d350bc0f3c59a47e58e8adbeecdc850d2c13a0"
 dependencies = [
- "embed-resource",
+ "embed-resource 3.0.1",
  "toml 0.8.19",
 ]
 
