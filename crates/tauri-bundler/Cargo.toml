@@ -73,4 +73,4 @@ path = "src/lib.rs"
 default = ["rustls"]
 native-tls = ["ureq/native-tls"]
 native-tls-vendored = ["native-tls", "native-tls/vendored"]
-rustls = ["ureq/tls"]
+rustls = ["ureq/rustls"]

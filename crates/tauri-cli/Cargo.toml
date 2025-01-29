@@ -148,4 +148,4 @@ native-tls = [
   "ureq/native-tls",
 ]
 native-tls-vendored = ["native-tls", "tauri-bundler/native-tls-vendored"]
-rustls = ["tauri-bundler/rustls", "cargo-mobile2/rustls", "ureq/tls"]
+rustls = ["tauri-bundler/rustls", "cargo-mobile2/rustls", "ureq/rustls"]
