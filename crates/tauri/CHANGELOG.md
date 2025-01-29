@@ -1,5 +1,28 @@
 # Changelog
 
+## \[2.3.0]
+
+### New Features
+
+- [`abdd55807`](https://www.github.com/tauri-apps/tauri/commit/abdd55807587f1bb41b95d0b129ba24b3c6e1d28) ([#12460](https://www.github.com/tauri-apps/tauri/pull/12460) by [@WSH032](https://www.github.com/tauri-apps/tauri/../../WSH032)) Add `emit_str*` methods to `Emitter` trait to allow emitting JSON serialized data directly.
+
+### Enhancements
+
+- [`a2d36b8c3`](https://www.github.com/tauri-apps/tauri/commit/a2d36b8c34a8dcfc6736797ca5cd4665faf75e7e) ([#12181](https://www.github.com/tauri-apps/tauri/pull/12181) by [@bastiankistner](https://www.github.com/tauri-apps/tauri/../../bastiankistner)) Add an option to change the default background throttling policy (currently for WebKit only).
+- [`e9c9c4d6f`](https://www.github.com/tauri-apps/tauri/commit/e9c9c4d6f6f9c39f848183bc432790b1f9cb74fc) ([#12529](https://www.github.com/tauri-apps/tauri/pull/12529) by [@amrbashir](https://www.github.com/tauri-apps/tauri/../../amrbashir)) Derive `Clone` for `PathResolver` struct.
+
+### Bug Fixes
+
+- [`3dbcbe768`](https://www.github.com/tauri-apps/tauri/commit/3dbcbe7685319724c41e66d912b5daaec7f99868) ([#12461](https://www.github.com/tauri-apps/tauri/pull/12461) by [@WSH032](https://www.github.com/tauri-apps/tauri/../../WSH032)) `Webview::navigate` and `WebviewWindow::navigate` borrows `&self` instead of unnecessarily borrowing `&mut self`.
+
+### Dependencies
+
+- Upgraded to `tauri-runtime@2.4.0`
+- Upgraded to `tauri-runtime-wry@2.4.0`
+- Upgraded to `tauri-utils@2.2.0`
+- Upgraded to `tauri-macros@2.0.5`
+- Upgraded to `tauri-build@2.0.6`
+
 ## \[2.2.5]
 
 ### Bug Fixes
