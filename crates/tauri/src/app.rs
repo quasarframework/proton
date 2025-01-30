@@ -474,6 +474,7 @@ impl<R: Runtime> AppHandle<R> {
     if self.runtime_handle.request_exit(RESTART_EXIT_CODE).is_err() {
       self.cleanup_before_exit();
     }
+    let _impede = self.manager.wait_for_event_loop_exit();
     crate::process::restart(&self.env());
   }
 
@@ -1084,6 +1085,7 @@ impl<R: Runtime> App<R> {
         let event = on_event_loop_event(&app_handle, RuntimeRunEvent::Exit, &manager);
         callback(&app_handle, event);
         app_handle.cleanup_before_exit();
+        manager.notify_event_loop_exit();
       }
       _ => {
         let event = on_event_loop_event(&app_handle, event, &manager);
