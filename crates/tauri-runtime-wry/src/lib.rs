@@ -530,7 +530,6 @@ impl<'a> From<&TaoWindowEvent<'a>> for WindowEventWrapper {
         scale_factor: *scale_factor,
         new_inner_size: PhysicalSizeWrapper(**new_inner_size).into(),
       },
-      #[cfg(any(target_os = "linux", target_os = "macos"))]
       TaoWindowEvent::Focused(focused) => WindowEvent::Focused(*focused),
       TaoWindowEvent::ThemeChanged(theme) => WindowEvent::ThemeChanged(map_theme(theme)),
       _ => return Self(None),
