@@ -48,7 +48,8 @@ pub fn bundle_project(settings: &Settings) -> crate::Result<Vec<PathBuf>> {
 
   fs::create_dir_all(&tools_path)?;
 
-  let (appimagetool, lib4bin) = prepare_tools(&tools_path, tools_arch)?;
+  #[allow(unused)]
+  let (appimagetool, lib4bin, uruntime) = prepare_tools(&tools_path, tools_arch)?;
 
   let package_dir = settings
     .project_out_directory()
@@ -200,16 +201,49 @@ pub fn bundle_project(settings: &Settings) -> crate::Result<Vec<PathBuf>> {
       &appimage_path.to_string_lossy(),
     ])
     .output_ok()?;
+  /* Command::new(&uruntime)
+    .env("ARCH", tools_arch)
+    .args([
+      "--appimage-mkdwarfs",
+      "-f",
+      "--set-owner",
+      "0",
+      "--set-group",
+      "0",
+      "--no-history",
+      "--no-create-timestamp",
+      "--compression",
+      "zstd:level=22",
+      "-S24",
+      "-B16",
+      "--header",
+      &uruntime.to_string_lossy(),
+      "-i",
+      &app_dir_path.to_string_lossy(),
+      "-o",
+      &appimage_path.to_string_lossy(),
+    ])
+    .output_ok()?;
+  {
+    use std::os::unix::fs::PermissionsExt;
+    fs::set_permissions(appimage_path, fs::Permissions::from_mode(0o770))?;
+  } */
 
   fs::remove_dir_all(package_dir)?;
   Ok(vec![appimage_path])
 }
 
-fn prepare_tools(tools_path: &Path, arch: &str) -> crate::Result<(PathBuf, PathBuf)> {
+fn prepare_tools(tools_path: &Path, arch: &str) -> crate::Result<(PathBuf, PathBuf, PathBuf)> {
   let appimagetool = tools_path.join(format!("appimagetool-{arch}.AppImage"));
   if !appimagetool.exists() {
     let data = download(&format!("https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-{arch}.AppImage"))?;
     write_and_make_executable(&appimagetool, data)?;
+  }
+
+  let uruntime = tools_path.join(format!("uruntime-appimage-dwarfs-{arch}"));
+  if !uruntime.exists() {
+    let data = download(&format!("https://github.com/VHSgunzo/uruntime/releases/latest/download/uruntime-appimage-dwarfs-{arch}"))?;
+    write_and_make_executable(&uruntime, data)?;
   }
 
   let lib4bin = tools_path.join(format!("lib4bin-{arch}"));
@@ -219,5 +253,5 @@ fn prepare_tools(tools_path: &Path, arch: &str) -> crate::Result<(PathBuf, PathB
     write_and_make_executable(&lib4bin, data)?;
   }
 
-  Ok((appimagetool, lib4bin))
+  Ok((appimagetool, lib4bin, uruntime))
 }
