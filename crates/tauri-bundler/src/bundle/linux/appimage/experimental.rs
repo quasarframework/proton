@@ -142,9 +142,7 @@ pub fn bundle_project(settings: &Settings) -> crate::Result<Vec<PathBuf>> {
     _ => "",
   };
 
-  // TODO(--NOW--): THIS STEP FAILS IF BUILD SYSTEM HAS MORE THAN ONE WEBKIT VERSION!!!
-  // TODO(--NOW--): make it bundle only 4.0 (v1) / 4.1 (v2) / 6.0 (v3)
-  // TODO(--NOW--): Check if we can make parts of the opengl deps optional
+  // TODO(--NOW--): Check if we can make parts of the opengl (incl. libvulkan) deps optional
   // TODO(later): rustify this (finding the paths in rust instead of using bash glob patterns)
   // TODO(later): Consider putting gst and pulse behind bundleMediaFramwork for ~150mb -> ~130mb
   Command::new("/bin/sh")
@@ -152,7 +150,7 @@ pub fn bundle_project(settings: &Settings) -> crate::Result<Vec<PathBuf>> {
     .args([
       "-c",
       &format!(
-        "{} -p {} -r {} -k {} /usr/lib/x86_64-linux-gnu/libGL* /usr/lib/x86_64-linux-gnu/libEGL* /usr/lib/x86_64-linux-gnu/libvulkan* /usr/lib/x86_64-linux-gnu/dri/* /usr/lib/x86_64-linux-gnu/libpulsecommon* /usr/lib/x86_64-linux-gnu/libnss_mdns* /usr/lib/x86_64-linux-gnu/gstreamer-1.0/* /usr/lib/x86_64-linux-gnu/libwebkit2gtk*",
+        "{} -p {} -r {} -k {} /usr/lib/x86_64-linux-gnu/libGL* /usr/lib/x86_64-linux-gnu/libEGL* /usr/lib/x86_64-linux-gnu/libvulkan* /usr/lib/x86_64-linux-gnu/dri/* /usr/lib/x86_64-linux-gnu/libpulsecommon* /usr/lib/x86_64-linux-gnu/libnss_mdns* /usr/lib/x86_64-linux-gnu/gstreamer-1.0/* /usr/lib/x86_64-linux-gnu/libwebkit2gtk-4.1*",
         lib4bin.to_string_lossy(),
         verbosity,
         strip,
