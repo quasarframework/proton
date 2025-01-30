@@ -150,7 +150,16 @@ pub fn bundle_project(settings: &Settings) -> crate::Result<Vec<PathBuf>> {
     .args([
       "-c",
       &format!(
-        "{} -p {} -r {} -k {} /usr/lib/x86_64-linux-gnu/libGL* /usr/lib/x86_64-linux-gnu/libEGL* /usr/lib/x86_64-linux-gnu/libvulkan* /usr/lib/x86_64-linux-gnu/dri/* /usr/lib/x86_64-linux-gnu/libpulsecommon* /usr/lib/x86_64-linux-gnu/libnss_mdns* /usr/lib/x86_64-linux-gnu/gstreamer-1.0/* /usr/lib/x86_64-linux-gnu/libwebkit2gtk-4.1*",
+        r#"{} -p {} -r {} -k {} \
+/usr/lib/x86_64-linux-gnu/libGL* \
+/usr/lib/x86_64-linux-gnu/libEGL* \
+/usr/lib/x86_64-linux-gnu/libvulkan* \
+/usr/lib/x86_64-linux-gnu/dri/* \
+/usr/lib/x86_64-linux-gnu/libpulsecommon* \
+/usr/lib/x86_64-linux-gnu/libnss_mdns* \
+/usr/lib/x86_64-linux-gnu/gstreamer-1.0/* \
+/usr/lib/x86_64-linux-gnu/libwebkit2gtk-4.1* \
+/usr/lib/x86_64-linux-gnu/gio/modules/*"#,
         lib4bin.to_string_lossy(),
         verbosity,
         strip,
