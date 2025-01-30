@@ -330,6 +330,8 @@ pub struct AppImageConfig {
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct DebConfig {
+  /// override the debian package name.
+  pub package_name: Option<String>,
   /// The list of deb dependencies your application relies on.
   pub depends: Option<Vec<String>>,
   /// The list of deb dependencies your application recommends.
@@ -429,6 +431,8 @@ pub enum RpmCompression {
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RpmConfig {
+  /// Override the RPM package name.
+  pub package_name: Option<String>,
   /// The list of RPM dependencies your application relies on.
   pub depends: Option<Vec<String>>,
   /// The list of RPM dependencies your application recommends.
@@ -478,6 +482,7 @@ pub struct RpmConfig {
 impl Default for RpmConfig {
   fn default() -> Self {
     Self {
+      package_name: None,
       depends: None,
       recommends: None,
       provides: None,

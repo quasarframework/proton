@@ -2874,6 +2874,13 @@
       "description": "Configuration for Debian (.deb) bundles.\n\n See more: <https://v2.tauri.app/reference/config/#debconfig>",
       "type": "object",
       "properties": {
+        "packageName": {
+          "description": "override the debian package name.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "depends": {
           "description": "The list of deb dependencies your application relies on.",
           "type": [
@@ -2995,6 +3002,13 @@
       "description": "Configuration for RPM bundles.",
       "type": "object",
       "properties": {
+        "packageName": {
+          "description": "Override the RPM package name.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "depends": {
           "description": "The list of RPM dependencies your application relies on.",
           "type": [
