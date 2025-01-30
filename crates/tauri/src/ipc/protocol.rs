@@ -414,8 +414,8 @@ fn handle_ipc_message<R: Runtime>(request: Request<String>, manager: &AppManager
                     error,
                   );
                 } else {
-                  let _ = Channel::from_callback_fn(webview, callback)
-                    .send(InvokeResponseBody::Raw(v.clone()));
+                  let _ =
+                    Channel::from_callback_fn(webview, callback).send(InvokeResponseBody::Raw(v));
                 }
               }
               InvokeResponse::Err(e) => responder_eval(
@@ -601,7 +601,7 @@ mod tests {
     let invoke_key = "1234ahdsjkl123";
     let callback = 12378123;
     let error = 6243;
-    let headers = HeaderMap::from_iter(vec![
+    let mut headers = HeaderMap::from_iter(vec![
       (
         CONTENT_TYPE,
         HeaderValue::from_str(mime::APPLICATION_OCTET_STREAM.as_ref()).unwrap(),
@@ -641,7 +641,6 @@ mod tests {
       "anotherKey": "asda",
     });
 
-    let mut headers = headers.clone();
     headers.insert(
       CONTENT_TYPE,
       HeaderValue::from_str(mime::APPLICATION_JSON.as_ref()).unwrap(),
