@@ -197,7 +197,7 @@ impl<T: UserEvent, R: Runtime<T>> PartialEq for DetachedWebview<T, R> {
 pub struct WebviewAttributes {
   pub url: WebviewUrl,
   pub user_agent: Option<String>,
-  pub initialization_scripts: Vec<String>,
+  pub initialization_scripts: Vec<(String, bool)>,
   pub data_directory: Option<PathBuf>,
   pub drag_drop_handler_enabled: bool,
   pub clipboard: bool,
@@ -298,7 +298,15 @@ impl WebviewAttributes {
   /// Sets the init script.
   #[must_use]
   pub fn initialization_script(mut self, script: &str) -> Self {
-    self.initialization_scripts.push(script.to_string());
+    self.initialization_scripts.push((script.to_string(), true));
+    self
+  }
+
+  /// Sets the init script with the option to inject into sub-frames
+  pub fn initialization_script_for_main_only(mut self, script: &str, main_only: bool) -> Self {
+    self
+      .initialization_scripts
+      .push((script.to_string(), main_only));
     self
   }
 

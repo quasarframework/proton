@@ -671,7 +671,17 @@ fn main() {
     self
       .webview_attributes
       .initialization_scripts
-      .push(script.to_string());
+      .push((script.to_string(), true));
+    self
+  }
+
+  /// Adds an initialization script with the option to inject into sub-frames
+  #[must_use]
+  pub fn initialization_script_for_main_only(mut self, script: &str, main_only: bool) -> Self {
+    self
+      .webview_attributes
+      .initialization_scripts
+      .push((script.to_string(), main_only));
     self
   }
 

@@ -4383,8 +4383,8 @@ fn create_webview<T: UserEvent>(
     ipc_handler,
   ));
 
-  for script in webview_attributes.initialization_scripts {
-    webview_builder = webview_builder.with_initialization_script(&script);
+  for (script, main_only) in webview_attributes.initialization_scripts {
+    webview_builder = webview_builder.with_initialization_script_for_main_only(&script, main_only);
   }
 
   for (scheme, protocol) in uri_scheme_protocols {

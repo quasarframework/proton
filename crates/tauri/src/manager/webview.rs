@@ -542,13 +542,14 @@ impl<R: Runtime> WebviewManager<R> {
         os_name: &'a str,
       }
 
-      pending.webview_attributes.initialization_scripts.push(
+      pending.webview_attributes.initialization_scripts.push((
         HotkeyZoom {
           os_name: std::env::consts::OS,
         }
         .render_default(&Default::default())?
         .into_string(),
-      )
+        true,
+      ))
     }
 
     #[cfg(feature = "isolation")]
