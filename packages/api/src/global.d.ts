@@ -30,6 +30,7 @@ declare global {
           delimiter: string
         }
       }
+      ready: boolean
     }
   }
 }
