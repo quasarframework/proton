@@ -308,11 +308,11 @@ function isTauri(): boolean {
 
 function tauriReady(): Promise<void> {
   if (window.__TAURI_INTERNALS__?.ready) {
-    return Promise.resolve();
+    return Promise.resolve()
   } else {
     return new Promise((resolve) => {
-      window.addEventListener("tauriReady", () => resolve());
-    });
+      window.addEventListener('tauriReady', () => resolve())
+    })
   }
 }
 
@@ -329,5 +329,5 @@ export {
   invoke,
   convertFileSrc,
   isTauri,
-  tauriReady,
+  tauriReady
 }
