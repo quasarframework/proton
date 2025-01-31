@@ -213,6 +213,14 @@ impl<R: Runtime> WebviewManager<R> {
       }
     }
 
+    all_initialization_scripts.push(
+      r#"
+        Object.defineProperty(window.__TAURI_INTERNALS__, 'ready', { value: true });
+        window.dispatchEvent(new Event("tauriReady"));
+      "#
+      .to_string(),
+    );
+
     webview_attributes
       .initialization_scripts
       .splice(0..0, all_initialization_scripts);

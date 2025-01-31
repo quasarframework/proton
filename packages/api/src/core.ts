@@ -306,6 +306,16 @@ function isTauri(): boolean {
   return 'isTauri' in window && !!window.isTauri
 }
 
+function tauriReady(): Promise<void> {
+  if (window.__TAURI_INTERNALS__?.ready) {
+    return Promise.resolve()
+  } else {
+    return new Promise((resolve) => {
+      window.addEventListener('tauriReady', () => resolve())
+    })
+  }
+}
+
 export type { InvokeArgs, InvokeOptions }
 
 export {
@@ -318,5 +328,6 @@ export {
   requestPermissions,
   invoke,
   convertFileSrc,
-  isTauri
+  isTauri,
+  tauriReady
 }
