@@ -176,7 +176,13 @@ pub fn command(options: Options, noise_level: NoiseLevel) -> Result<()> {
   inject_resources(&config, tauri_config.lock().unwrap().as_ref().unwrap())?;
 
   let mut plist = plist::Dictionary::new();
-  let version = interface.app_settings().get_package_settings().version;
+  let version = interface
+    .app_settings()
+    .get_package_settings()
+    .version
+    .chars()
+    .take_while(|c| c != &'-')
+    .collect::<String>();
   plist.insert("CFBundleShortVersionString".into(), version.clone().into());
   plist.insert("CFBundleVersion".into(), version.into());
 

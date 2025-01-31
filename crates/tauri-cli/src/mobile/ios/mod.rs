@@ -121,6 +121,11 @@ pub fn get_config(
       .extend_from_slice(features);
   }
 
+  let version = tauri_config
+    .version
+    .clone()
+    .map(|semver| semver.chars().take_while(|c| c != &'-').collect::<String>());
+
   let raw = RawAppleConfig {
     development_team: std::env::var(APPLE_DEVELOPMENT_TEAM_ENV_VAR_NAME)
         .ok()
@@ -140,8 +145,8 @@ pub fn get_config(
           }
         }),
     ios_features: ios_options.features.clone(),
-    bundle_version: tauri_config.version.clone(),
-    bundle_version_short: tauri_config.version.clone(),
+    bundle_version: version.clone(),
+    bundle_version_short: version.clone(),
     ios_version: Some(tauri_config.bundle.ios.minimum_system_version.clone()),
     ..Default::default()
   };
