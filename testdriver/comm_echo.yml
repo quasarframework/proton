@@ -1,0 +1,33 @@
+version: 4.1.58
+session: 679ed1b8a1ad2d40a789e790
+steps:
+  - prompt: focus tauri API Validation
+    commands:
+      - command: hover-text
+        text: Tauri API Validation
+        description: window title of the Tauri API Validation application
+        action: click
+  - prompt: click the Communication tab in the sidebar
+    commands:
+      - command: hover-text
+        text: Communication
+        description: >-
+          Communication tab in the sidebar of the Tauri API Validation
+          application
+        action: click
+  - prompt: Click the Echo button
+    commands:
+      - command: hover-text
+        text: Echo
+        description: >-
+          Echo button in the Communication section of the
+          Tauri API Validation application
+        action: click
+  - prompt: Wait 5 seconds
+    commands:
+      - command: wait
+        timeout: 5000
+  - prompt: Assert that the console shows a successful response
+    commands:
+      - command: assert
+        expect: the console shows a response with "Tauri JSON request!" and "1, 2, 3"
