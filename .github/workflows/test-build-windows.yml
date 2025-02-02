@@ -14,42 +14,52 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Install pnpm explicitly
         run: |
           npm install -g pnpm
           pnpm --version  # Verify pnpm is installed and available
+
       - name: Setup node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
           architecture: x64
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: x86_64-pc-windows-msvc
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
+
       - name: Build CLI
         run: pnpm run build:cli
         shell: bash
-      - name: Build AIP
+
+      - name: Build API
         run: pnpm run build:api
         shell: bash
+
       - name: Build API Example App
         run: |
           cd examples/api
           pnpm tauri build
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: bindings-x86_64-pc-windows-msvc
           path: target\release\bundle\nsis\*
           if-no-files-found: error
+
       - name: Set environment variables
         run: |
           echo "GITHUB_REPOSITORY=${{ github.repository }}" >> $GITHUB_ENV
           echo "GITHUB_RUN_ID=${{ github.run_id }}" >> $GITHUB_ENV
+
       - uses: testdriverai/action@main
         with:
           key: ${{ secrets.TESTDRIVER_API_KEY }}
@@ -63,6 +73,7 @@ jobs:
             $artifactFileName = "waveterm.exe"
             $artifactFilePath = "$downloadFolder/$artifactFileName"
             Write-Host "Starting the artifact download process..."
+            
             # Create the download directory if it doesn't exist
             if (-not (Test-Path -Path $downloadFolder)) {
                 Write-Host "Creating download folder..."
@@ -70,6 +81,7 @@ jobs:
             } else {
                 Write-Host "Download folder already exists."
             }
+
             # Debugging: Check if environment variables are correctly set
             Write-Host "Repository: $env:GITHUB_REPOSITORY"
             Write-Host "Run ID: $env:GITHUB_RUN_ID"
@@ -90,13 +102,8 @@ jobs:
             } catch {
                 Write-Error "Failed to fetch the artifact URL: $_"
                 exit 1
-            }d_url
-            if ($artifactUrl) {
-                Write-Host "Artifact URL successfully fetched: $artifactUrl"
-            } else {
-                Write-Error "Failed to fetch the artifact URL."
-                exit 1
             }
+
             # Download the artifact (zipped file)
             Write-Host "Starting artifact download..."
             $artifactZipPath = "$env:TEMP\artifact.zip"
@@ -110,6 +117,7 @@ jobs:
                 Write-Error "Error downloading artifact: $_"
                 exit 1
             }
+
             # Unzip the artifact
             $artifactUnzipPath = "$env:TEMP\artifact"
             Write-Host "Unzipping the artifact to $artifactUnzipPath..."
@@ -120,6 +128,7 @@ jobs:
                 Write-Error "Failed to unzip the artifact: $_"
                 exit 1
             }
+
             # Find the installer or app executable
             $artifactInstallerPath = Get-ChildItem -Path $artifactUnzipPath -Filter *.exe -Recurse | Select-Object -First 1
             if ($artifactInstallerPath) {
@@ -128,6 +137,7 @@ jobs:
                 Write-Error "Executable file not found. Exiting."
                 exit 1
             }
+
             # Run the installer and log the result
             Write-Host "Running the installer: $($artifactInstallerPath.FullName)..."
             try {
@@ -137,11 +147,13 @@ jobs:
                 Write-Error "Failed to run the installer: $_"
                 exit 1
             }
+
             # Optional: If the app executable is different from the installer, find and launch it
             $wavePath = Join-Path $env:USERPROFILE "AppData\Local\Programs\waveterm\Wave.exe"
             Write-Host "Launching the application: $($wavePath)"
             Start-Process -FilePath $wavePath
             Write-Host "Application launched."
+
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FORCE_COLOR: "3"
