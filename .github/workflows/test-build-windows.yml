@@ -31,7 +31,10 @@ jobs:
       - name: Install dependencies
         run: |
           cd examples/api
-          pnpm i --frozen-lockfile --ignore-scripts
+          pnpm install --prod --frozen-lockfile --ignore-scripts
+      - name: Install Tauri CLI
+        run: |
+          pnpm add @tauri-apps/cli --dev
       - name: Build API Example App
         run: |
           cd examples/api
@@ -91,7 +94,6 @@ jobs:
               Write-Error "❌ Executable not found."
               exit 1
           }
-
       - name: Run TestDriver Tests
         uses: testdriverai/action@main
         with:
@@ -101,4 +103,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FORCE_COLOR: "3"
-
