@@ -51,22 +51,16 @@ jobs:
       fail-fast: false
       matrix:
         test:
-          - name: "Functions testdriver"
-            file: "testdriver/functions.yml"
-          - name: "Chat testdriver"
-            file: "testdriver/chat_test.yml"
-          - name: "P2P dynamic payment testdriver"
-            file: "testdriver/p2p_dynamic_payment.yml"
-          - name: "Dynamic matchmaking testdriver"
-            file: "testdriver/skill_based_matchmaking.yml"
-          - name: "Support search testdriver"
-            file: "testdriver/support_search.yml"
-          - name: "Ask AI testdriver"
-            file: "testdriver/ask_ai.yml"
-          - name: "Edit settings testdriver"
-            file: "testdriver/edit_account_settings.yml"
-          - name: "Debug console testdriver"
-            file: "testdriver/debug_console.yml"
+          - name: "Call Log API testdriver"
+            file: "testdriver/comm_call_log_api.yml"
+          - name: "Call Request API testdriver"
+            file: "testdriver/comm_call_request_api.yml"
+          - name: "Echo testdriver"
+            file: "testdriver/comm_echo.yml"
+          - name: "Send Event to Rust testdriver"
+            file: "testdriver/comm_send_event_rust.yml"
+          - name: "Spam testdriver"
+            file: "testdriver/comm_spam.yml"
     steps:
       - name: Download Built App
         uses: actions/download-artifact@v4
