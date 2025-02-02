@@ -28,9 +28,10 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: x86_64-pc-windows-msvc
-      - name: Install dependencies
+      - name: Install dependencies (clean)
         run: |
           cd examples/api
+          rm -rf node_modules pnpm-lock.yaml  # Clean old dependencies
           pnpm install --prod --frozen-lockfile --ignore-scripts
       - name: Install Tauri CLI
         run: |
@@ -104,3 +105,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FORCE_COLOR: "3"
+
