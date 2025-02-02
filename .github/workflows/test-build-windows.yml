@@ -31,9 +31,13 @@ jobs:
       - name: Build CLI
         run: pnpm run build:cli
         shell: bash
-      - name: Build AIP
+      - name: Build API
         run: pnpm run build:api
         shell: bash
+      - name: Install dependencies for API Example App
+        run: |
+          cd examples/api
+          pnpm i
       - name: Build API Example App
         run: |
           cd examples/api
@@ -42,21 +46,22 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bindings-x86_64-pc-windows-msvc
-          path: target\release\bundle\nsis\*
+          path: examples/api/src-tauri/target/release/app.exe
           if-no-files-found: error
       - uses: testdriverai/action@main
         with:
           key: ${{ secrets.TESTDRIVER_API_KEY }}
           prompt: | 
-            1. click around the desktop app 
+            1. Click around the desktop app 
           prerun: |
             $headers = @{
                 Authorization = "token ${{ secrets.GITHUB_TOKEN }}"
             }
             $downloadFolder = "./download"
-            $artifactFileName = "waveterm.exe"
+            $artifactFileName = "app.exe"
             $artifactFilePath = "$downloadFolder/$artifactFileName"
             Write-Host "Starting the artifact download process..."
+            
             # Create the download directory if it doesn't exist
             if (-not (Test-Path -Path $downloadFolder)) {
                 Write-Host "Creating download folder..."
@@ -64,6 +69,7 @@ jobs:
             } else {
                 Write-Host "Download folder already exists."
             }
+
             # Fetch the artifact upload URL
             Write-Host "Fetching the artifact upload URL..."
             $artifactUrl = (Invoke-RestMethod -Uri "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}/artifacts" -Headers $headers).artifacts[0].archive_download_url
@@ -73,6 +79,7 @@ jobs:
                 Write-Error "Failed to fetch the artifact URL."
                 exit 1
             }
+
             # Download the artifact (zipped file)
             Write-Host "Starting artifact download..."
             $artifactZipPath = "$env:TEMP\artifact.zip"
@@ -86,6 +93,7 @@ jobs:
                 Write-Error "Error downloading artifact: $_"
                 exit 1
             }
+
             # Unzip the artifact
             $artifactUnzipPath = "$env:TEMP\artifact"
             Write-Host "Unzipping the artifact to $artifactUnzipPath..."
@@ -96,6 +104,7 @@ jobs:
                 Write-Error "Failed to unzip the artifact: $_"
                 exit 1
             }
+
             # Find the installer or app executable
             $artifactInstallerPath = Get-ChildItem -Path $artifactUnzipPath -Filter *.exe -Recurse | Select-Object -First 1
             if ($artifactInstallerPath) {
@@ -104,21 +113,16 @@ jobs:
                 Write-Error "Executable file not found. Exiting."
                 exit 1
             }
-            # Run the installer and log the result
-            Write-Host "Running the installer: $($artifactInstallerPath.FullName)..."
+
+            # Run the app directly instead of an installer
+            Write-Host "Launching the Tauri API Example App: $($artifactInstallerPath.FullName)..."
             try {
-                Start-Process -FilePath $artifactInstallerPath.FullName -Wait
-                Write-Host "Installer ran successfully."
+                Start-Process -FilePath $artifactInstallerPath.FullName
+                Write-Host "Application launched."
             } catch {
-                Write-Error "Failed to run the installer: $_"
+                Write-Error "Failed to run the application: $_"
                 exit 1
             }
-            # Optional: If the app executable is different from the installer, find and launch it
-            $wavePath = Join-Path $env:USERPROFILE "AppData\Local\Programs\waveterm\Wave.exe"
-            Write-Host "Launching the application: $($wavePath)"
-            Start-Process -FilePath $wavePath
-            Write-Host "Application launched."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FORCE_COLOR: "3"
-
