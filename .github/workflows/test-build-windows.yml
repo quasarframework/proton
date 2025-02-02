@@ -24,7 +24,10 @@ jobs:
       - name: Disable Corepack
         run: corepack disable
       - name: Install Specific pnpm Version
-        run: npm install -g pnpm@8.15.4  # Use the latest stable version or the version you need
+        run: |
+          npm install -g pnpm@8.15.4
+          echo "Adding pnpm to PATH"
+          echo "$(npm bin -g)" >> $GITHUB_PATH
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
