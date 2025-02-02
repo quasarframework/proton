@@ -23,13 +23,9 @@ jobs:
         with:
           targets: x86_64-pc-windows-msvc
       - name: Install dependencies
-        run: pnpm i --frozen-lockfile --ignore-scripts
-      - name: Build CLI
-        run: pnpm run build:cli
-        shell: bash
-      - name: Build API
-        run: pnpm run build:api
-        shell: bash
+        run: |
+          cd examples/api
+          pnpm i --frozen-lockfile --ignore-scripts
       - name: Build API Example App
         run: |
           cd examples/api
@@ -37,15 +33,9 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: bindings-x86_64-pc-windows-msvc
-          path: target\release\bundle\nsis\*
+          name: tauri-app
+          path: examples/api/src-tauri/target/release/app.exe
           if-no-files-found: error
-      - name: Fetch artifact URL
-        run: |
-          echo "Fetching artifact URL..."
-          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-               "https://api.github.com/repos/${{ github.repository }}/actions/artifacts" \
-               | jq '.artifacts[0].archive_download_url'
       - uses: testdriverai/action@main
         with:
           key: ${{ secrets.TESTDRIVER_API_KEY }}
@@ -57,7 +47,7 @@ jobs:
                 Authorization = "token ${{ secrets.GITHUB_TOKEN }}"
             }
             $downloadFolder = "./download"
-            $artifactFileName = "waveterm.exe"
+            $artifactFileName = "app.exe"
             $artifactFilePath = "$downloadFolder/$artifactFileName"
             Write-Host "Starting the artifact download process..."
             if (-not (Test-Path -Path $downloadFolder)) {
@@ -82,7 +72,7 @@ jobs:
             }
             $artifactUnzipPath = "$env:TEMP\artifact"
             Expand-Archive -Path $artifactZipPath -DestinationPath $artifactUnzipPath -Force
-            $artifactInstallerPath = Get-ChildItem -Path $artifactUnzipPath -Filter *.exe -Recurse | Select-Object -First 1
+            $artifactInstallerPath = Get-ChildItem -Path $artifactUnzipPath -Filter app.exe -Recurse | Select-Object -First 1
             if ($artifactInstallerPath) {
                 Write-Host "Executable found: $($artifactInstallerPath.FullName)"
                 Start-Process -FilePath $artifactInstallerPath.FullName -Wait
@@ -90,6 +80,5 @@ jobs:
                 Write-Error "Executable not found."
                 exit 1
             }
-            $wavePath = Join-Path $env:USERPROFILE "AppData\Local\Programs\waveterm\Wave.exe"
-            Start-Process -FilePath $wavePath
             Write-Host "Application launched."
+
