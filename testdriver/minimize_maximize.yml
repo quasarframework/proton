@@ -1,0 +1,27 @@
+version: 4.1.58
+session: 679fdccba1ad2d40a789f609
+steps:
+  - prompt: focus tauri API Validation
+    commands:
+      - command: hover-text
+        text: Tauri API Validation
+        description: window title of the Tauri API Validation application
+        action: click
+  - prompt: maximize the tauri application
+    commands:
+      - command: hover-image
+        description: maximize button in the Tauri window title bar top right
+        action: click
+  - prompt: Assert that the Tauri application is maximized
+    commands:
+      - command: assert
+        expect: Tauri application is maximized
+  - prompt: restore down the tauri application
+    commands:
+      - command: hover-image
+        description: restore down button in the Tauri window title bar top right
+        action: click
+  - prompt: Assert that the Tauri application is restored down
+    commands:
+      - command: assert
+        expect: Tauri application is restored down

@@ -1,0 +1,29 @@
+version: 4.1.58
+session: 679fdccba1ad2d40a789f609
+steps:
+  - prompt: focus tauri API Validation
+    commands:
+      - command: hover-text
+        text: Tauri API Validation
+        description: window title of the Tauri API Validation application
+        action: click
+  - prompt: Click the dark mode button
+    commands:
+      - command: hover-text
+        text: Switch to Dark mode
+        description: Dark mode button in the Tauri API sidebar
+        action: click
+  - prompt: Assert that the Tauri application is dark mode
+    commands:
+      - command: assert
+        expect: Tauri application is dark mode
+  - prompt: Click the light mode button
+    commands:
+      - command: hover-text
+        text: Switch to Light mode
+        description: Light mode button in the Tauri API sidebar
+        action: click
+  - prompt: Assert that the Tauri application is light mode
+    commands:
+      - command: assert
+        expect: Tauri application is light mode
