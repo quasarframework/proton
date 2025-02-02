@@ -70,9 +70,27 @@ jobs:
             } else {
                 Write-Host "Download folder already exists."
             }
+            # Debugging: Check if environment variables are correctly set
+            Write-Host "Repository: $env:GITHUB_REPOSITORY"
+            Write-Host "Run ID: $env:GITHUB_RUN_ID"
+            
             # Fetch the artifact upload URL
             Write-Host "Fetching the artifact upload URL..."
-            $artifactUrl = (Invoke-RestMethod -Uri "https://api.github.com/repos/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID/artifacts" -Headers $headers).artifacts[0].archive_download_url
+            try {
+                $artifactResponse = Invoke-RestMethod -Uri "https://api.github.com/repos/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID/artifacts" -Headers $headers
+                Write-Host "Artifact API response: $($artifactResponse | ConvertTo-Json -Depth 3)"  # Print the full API response for debugging
+            
+                if ($artifactResponse.artifacts.Count -gt 0) {
+                    $artifactUrl = $artifactResponse.artifacts[0].archive_download_url
+                    Write-Host "Artifact URL successfully fetched: $artifactUrl"
+                } else {
+                    Write-Error "No artifacts found for this workflow run."
+                    exit 1
+                }
+            } catch {
+                Write-Error "Failed to fetch the artifact URL: $_"
+                exit 1
+            }d_url
             if ($artifactUrl) {
                 Write-Host "Artifact URL successfully fetched: $artifactUrl"
             } else {
