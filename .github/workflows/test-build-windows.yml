@@ -15,7 +15,6 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - run: corepack enable
       - name: Setup node
         uses: actions/setup-node@v4
         with:
@@ -26,6 +25,11 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: x86_64-pc-windows-msvc
+      - name: Clear corepack cache
+        run: |
+          npm cache clean --force
+          corepack disable
+          echo "Corepack cache cleared."
       - name: Install pnpm
         run: |
           npm install -g pnpm@8.15.4
