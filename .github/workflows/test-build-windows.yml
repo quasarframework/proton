@@ -1,18 +1,24 @@
-name: Build EXE for TestDriver
+name: Build and Test EXE for TestDriver
+
 env:
   DEBUG: napi:*
 
 on:
+  push:
+    branches: ["main"]
   pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *'
 
 jobs:
   build:
-    name: build windows
+    name: Build Windows EXE
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - run: corepack enable
-      - name: Setup node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -36,49 +42,69 @@ jobs:
           name: tauri-app
           path: examples/api/src-tauri/target/release/app.exe
           if-no-files-found: error
-      - uses: testdriverai/action@main
+
+  testdriver_matrix:
+    name: "TestDriver Matrix"
+    needs: build
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        test:
+          - name: "Functions testdriver"
+            file: "testdriver/functions.yml"
+          - name: "Chat testdriver"
+            file: "testdriver/chat_test.yml"
+          - name: "P2P dynamic payment testdriver"
+            file: "testdriver/p2p_dynamic_payment.yml"
+          - name: "Dynamic matchmaking testdriver"
+            file: "testdriver/skill_based_matchmaking.yml"
+          - name: "Support search testdriver"
+            file: "testdriver/support_search.yml"
+          - name: "Ask AI testdriver"
+            file: "testdriver/ask_ai.yml"
+          - name: "Edit settings testdriver"
+            file: "testdriver/edit_account_settings.yml"
+          - name: "Debug console testdriver"
+            file: "testdriver/debug_console.yml"
+    steps:
+      - name: Download Built App
+        uses: actions/download-artifact@v4
+        with:
+          name: tauri-app
+          path: ${{ runner.temp }}/tauri-app
+
+      - name: Verify and Launch Application
+        shell: pwsh
+        run: |
+          $exePath = "${{ runner.temp }}\tauri-app\app.exe"
+          if (Test-Path $exePath) {
+              Write-Host "✅ Executable found at: $exePath"
+              Unblock-File -Path $exePath
+              Write-Host "🚀 Launching application..."
+              
+              # Run process and keep it open for testing
+              $process = Start-Process -FilePath $exePath -NoNewWindow -PassThru
+              
+              Start-Sleep -Seconds 5  # Give time for startup
+              if ($process.HasExited) {
+                  Write-Error "❌ The application exited unexpectedly."
+                  exit 1
+              } else {
+                  Write-Host "✅ Application is running successfully."
+              }
+          } else {
+              Write-Error "❌ Executable not found."
+              exit 1
+          }
+
+      - name: Run TestDriver Tests
+        uses: testdriverai/action@main
         with:
           key: ${{ secrets.TESTDRIVER_API_KEY }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          prompt: | 
-            1. Click around the desktop app
-          prerun: |
-            $headers = @{
-                Authorization = "token ${{ secrets.GITHUB_TOKEN }}"
-            }
-            $downloadFolder = "./download"
-            $artifactFileName = "app.exe"
-            $artifactFilePath = "$downloadFolder/$artifactFileName"
-            Write-Host "Starting the artifact download process..."
-            if (-not (Test-Path -Path $downloadFolder)) {
-                mkdir $downloadFolder
-            }
-            Write-Host "Fetching the artifact upload URL..."
-            $artifactResponse = Invoke-RestMethod -Uri "https://api.github.com/repos/${{ github.repository }}/actions/artifacts" -Headers $headers
-            if ($artifactResponse.artifacts.Count -gt 0) {
-                $artifactUrl = $artifactResponse.artifacts[0].archive_download_url
-                Write-Host "Artifact URL: $artifactUrl"
-            } else {
-                Write-Error "No artifacts found."
-                exit 1
-            }
-            $artifactZipPath = "$env:TEMP\artifact.zip"
-            try {
-                Invoke-WebRequest -Uri $artifactUrl -Headers $headers -OutFile $artifactZipPath -MaximumRedirection 5
-                Write-Host "Artifact downloaded successfully."
-            } catch {
-                Write-Error "Error downloading artifact: $_"
-                exit 1
-            }
-            $artifactUnzipPath = "$env:TEMP\artifact"
-            Expand-Archive -Path $artifactZipPath -DestinationPath $artifactUnzipPath -Force
-            $artifactInstallerPath = Get-ChildItem -Path $artifactUnzipPath -Filter app.exe -Recurse | Select-Object -First 1
-            if ($artifactInstallerPath) {
-                Write-Host "Executable found: $($artifactInstallerPath.FullName)"
-                Start-Process -FilePath $artifactInstallerPath.FullName -Wait
-            } else {
-                Write-Error "Executable not found."
-                exit 1
-            }
-            Write-Host "Application launched."
+          prompt: |
+            1. /run ${{ matrix.test.file }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FORCE_COLOR: "3"
 
