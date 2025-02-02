@@ -1,7 +1,6 @@
 # Copyright 2019-2024 Tauri Programme within The Commons Conservancy
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-License-Identifier: MIT
-
 name: Build EXE for TestDriver
 env:
   DEBUG: napi:*
@@ -47,6 +46,10 @@ jobs:
           name: bindings-x86_64-pc-windows-msvc
           path: target\release\bundle\nsis\*
           if-no-files-found: error
+      - name: Set environment variables
+        run: |
+          echo "GITHUB_REPOSITORY=${{ github.repository }}" >> $GITHUB_ENV
+          echo "GITHUB_RUN_ID=${{ github.run_id }}" >> $GITHUB_ENV
       - uses: testdriverai/action@main
         with:
           key: ${{ secrets.TESTDRIVER_API_KEY }}
@@ -69,7 +72,7 @@ jobs:
             }
             # Fetch the artifact upload URL
             Write-Host "Fetching the artifact upload URL..."
-            $artifactUrl = (Invoke-RestMethod -Uri "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}/artifacts" -Headers $headers).artifacts[0].archive_download_url
+            $artifactUrl = (Invoke-RestMethod -Uri "https://api.github.com/repos/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID/artifacts" -Headers $headers).artifacts[0].archive_download_url
             if ($artifactUrl) {
                 Write-Host "Artifact URL successfully fetched: $artifactUrl"
             } else {
