@@ -759,7 +759,7 @@ impl<R: Runtime> WindowManager<R> {
         .map(|p| p.to_string())
         // the `strip_prefix` only returns None when a request is made to `https://tauri.$P` on Windows
         // where `$P` is not `localhost/*`
-        .unwrap_or_else(|| "".to_string());
+        .unwrap_or_default();
       let asset = manager.get_asset(path)?;
       let mut builder = HttpResponseBuilder::new()
         .header("Access-Control-Allow-Origin", &window_origin)

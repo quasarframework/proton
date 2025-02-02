@@ -73,7 +73,7 @@ pub enum Entry<'a, R: Read> {
   Zip(ZipEntry),
 }
 
-impl<'a, R: Read> Entry<'a, R> {
+impl<R: Read> Entry<'_, R> {
   /// The entry path.
   pub fn path(&self) -> crate::api::Result<Cow<'_, Path>> {
     match self {
@@ -145,7 +145,7 @@ pub struct Extract<'a, R: Read + Seek> {
   tar_archive: Option<tar::Archive<&'a mut ArchiveReader<R>>>,
 }
 
-impl<'a, R: std::fmt::Debug + Read + Seek> std::fmt::Debug for Extract<'a, R> {
+impl<R: std::fmt::Debug + Read + Seek> std::fmt::Debug for Extract<'_, R> {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("Extract")
       .field("reader", &self.reader)

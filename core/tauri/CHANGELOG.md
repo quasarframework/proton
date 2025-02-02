@@ -1,5 +1,64 @@
 # Changelog
 
+## \[1.8.2]
+
+### Dependencies
+
+- Upgraded to `tauri-utils@1.6.2`
+- Upgraded to `tauri-runtime@0.14.6`
+- Upgraded to `tauri-runtime-wry@0.14.11`
+- Upgraded to `tauri-macros@1.4.7`
+
+## \[1.8.1]
+
+### Bug Fixes
+
+- [`c72cd45cc`](https://www.github.com/tauri-apps/tauri/commit/c72cd45ccdef453ee1082d8b55409da41f8c343b) ([#11213](https://www.github.com/tauri-apps/tauri/pull/11213) by [@lucasfernog](https://www.github.com/tauri-apps/tauri/../../lucasfernog)) Fixes a deadlock on window creation when the `tracing` feature is enabled.
+- [`9ef1be46e`](https://www.github.com/tauri-apps/tauri/commit/9ef1be46e89794334313359879868c98f47167c0) ([#11070](https://www.github.com/tauri-apps/tauri/pull/11070) by [@amrbashir](https://www.github.com/tauri-apps/tauri/../../amrbashir)) Encode `+` when making updater requests which can be cause incorrectly interpolating the endpoint when using `{{current_version}}` in the endpoint where the current version contains a build number, for example `1.8.0+1`.
+
+## \[1.8.0]
+
+### New Features
+
+- [`50fbf7bf1`](https://www.github.com/tauri-apps/tauri/commit/50fbf7bf1d8ee7bd97c1c896524be9cf362c73aa) ([#10939](https://www.github.com/tauri-apps/tauri/pull/10939) by [@amrbashir](https://www.github.com/tauri-apps/tauri/../../amrbashir)) Add support for updating using non-zipped files. Only `.exe`(NSIS) and `.msi` (MSI Installer) on Windows and `.AppImage` on Linux.
+- [`50fbf7bf1`](https://www.github.com/tauri-apps/tauri/commit/50fbf7bf1d8ee7bd97c1c896524be9cf362c73aa) ([#10939](https://www.github.com/tauri-apps/tauri/pull/10939) by [@amrbashir](https://www.github.com/tauri-apps/tauri/../../amrbashir)) Pass `/UPDATE` flag to NSIS installer on updates
+
+### Enhancements
+
+- [`14443a131`](https://www.github.com/tauri-apps/tauri/commit/14443a13190fe006aedc96176e970f9ec8644c13) ([#10966](https://www.github.com/tauri-apps/tauri/pull/10966) by [@amrbashir](https://www.github.com/tauri-apps/tauri/../../amrbashir)) On Windows, maintain current CLI arguments when relaunching the app after updates using `.msi`.
+
+### Bug Fixes
+
+- [`26d243f43`](https://www.github.com/tauri-apps/tauri/commit/26d243f43a8528194689834dce0101bcba78196a) ([#10991](https://www.github.com/tauri-apps/tauri/pull/10991) by [@lucasfernog](https://www.github.com/tauri-apps/tauri/../../lucasfernog)) Fixes the restart() function not being compatible with the v2 binary name change.
+  Additionally, do not panic if we somehow failed to restart, and only exit instead.
+
+## \[1.7.2]
+
+### Enhancements
+
+- [`67b7ca6ef`](https://www.github.com/tauri-apps/tauri/commit/67b7ca6ef45b2b1eda97cd2a917fc98b24d90be1) ([#10356](https://www.github.com/tauri-apps/tauri/pull/10356) by [@github-actions](https://www.github.com/tauri-apps/tauri/../../github-actions)) Enhance `AssetResolver::get` in development mode by reading distDir directly as a fallback to the embedded assets.
+- [`51d043209`](https://www.github.com/tauri-apps/tauri/commit/51d043209b8aca8ceda2d51e2f92574a6c5b58f8) ([#9983](https://www.github.com/tauri-apps/tauri/pull/9983) by [@chippers](https://www.github.com/tauri-apps/tauri/../../chippers)) tracing for ipc invoke key errors, integration tests related
+  to [recent security advisory](https://github.com/tauri-apps/tauri/security/advisories/GHSA-57fm-592m-34r7)
+
+### Bug Fixes
+
+- [`eb58ac382`](https://www.github.com/tauri-apps/tauri/commit/eb58ac382b497030f819c26752ab592aeb02b67a) ([#10300](https://www.github.com/tauri-apps/tauri/pull/10300) by [@github-actions](https://www.github.com/tauri-apps/tauri/../../github-actions)) Fixed an issue causing native apis such as `window.alert` to break inside iframes on Windows.
+- [`56ffd29bc`](https://www.github.com/tauri-apps/tauri/commit/56ffd29bc85430fe93c0119bd6f5c28cfcdb58ca) ([#10288](https://www.github.com/tauri-apps/tauri/pull/10288) by [@github-actions](https://www.github.com/tauri-apps/tauri/../../github-actions)) Fixed a regression that added the `\\?\` UNC prefix to the path returned from the `tempdir()` command.
+- [`a3946222b`](https://www.github.com/tauri-apps/tauri/commit/a3946222b3047247cc46c7336ea1026f78bec012) ([#10433](https://www.github.com/tauri-apps/tauri/pull/10433) by [@github-actions](https://www.github.com/tauri-apps/tauri/../../github-actions)) Fixes asset resolving when not using the `compression` feature.
+- [`220bf92ed`](https://www.github.com/tauri-apps/tauri/commit/220bf92ed876c32fbc0b7e8d09b5292e3ffe526c) ([#9413](https://www.github.com/tauri-apps/tauri/pull/9413) by [@amrbashir](https://www.github.com/tauri-apps/tauri/../../amrbashir)) Fix NSIS updater creating new shortcuts on update.
+
+### What's Changed
+
+- [`fbcbc5ef7`](https://www.github.com/tauri-apps/tauri/commit/fbcbc5ef7cb5e3a69e3c23d6af24c8d340ae5f6b) ([#10392](https://www.github.com/tauri-apps/tauri/pull/10392) by [@github-actions](https://www.github.com/tauri-apps/tauri/../../github-actions)) Emit `cargo:rustc-check-cfg` instruction so Cargo validates custom cfg attributes on Rust 1.80 (or nightly-2024-05-05).
+
+### Dependencies
+
+- Upgraded to `tauri-runtime-wry@0.14.10`
+- Upgraded to `tauri-utils@1.6.1`
+- Upgraded to `tauri-runtime@0.14.5`
+- Upgraded to `tauri-macros@1.4.6`
+- [`48a7415c2`](https://www.github.com/tauri-apps/tauri/commit/48a7415c21d3f7634948558215dbfe4d1cc0460e) ([#10594](https://www.github.com/tauri-apps/tauri/pull/10594) by [@lucasfernog](https://www.github.com/tauri-apps/tauri/../../lucasfernog)) Update `serialize-to-javascript` to `v0.1.2`.
+
 ## \[1.7.1]
 
 ### Bug Fixes

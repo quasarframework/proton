@@ -650,10 +650,7 @@ impl<R: Runtime> PluginStore<R> {
     let target = tokens.next().unwrap();
 
     if let Some(plugin) = self.store.get_mut(target) {
-      invoke.message.command = tokens
-        .next()
-        .map(|c| c.to_string())
-        .unwrap_or_else(String::new);
+      invoke.message.command = tokens.next().map(|c| c.to_string()).unwrap_or_default();
       #[cfg(feature = "tracing")]
       let _span = tracing::trace_span!("plugin::hooks::ipc", name = plugin.name()).entered();
       plugin.extend_api(invoke);

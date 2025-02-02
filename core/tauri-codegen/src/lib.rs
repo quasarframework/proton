@@ -39,6 +39,7 @@ pub enum CodegenConfigError {
 ///
 /// If the passed path is relative, it should be relative to the current working directory of the
 /// compiling crate.
+#[allow(clippy::result_large_err)]
 pub fn get_config(path: &Path) -> Result<(Config, PathBuf), CodegenConfigError> {
   let path = if path.is_relative() {
     let cwd = std::env::current_dir().map_err(CodegenConfigError::CurrentDir)?;

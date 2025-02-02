@@ -1,5 +1,47 @@
 # Changelog
 
+## \[1.6.5]
+
+### Dependencies
+
+- Upgraded to `tauri-cli@1.6.5`
+
+## \[1.6.4]
+
+### Dependencies
+
+- Upgraded to `tauri-cli@1.6.4`
+
+## \[1.6.3]
+
+### New Features
+
+- [`343b11d7c`](https://www.github.com/tauri-apps/tauri/commit/343b11d7c775fc01aa6ff8ab517fd1edd7e483ca) ([#11305](https://www.github.com/tauri-apps/tauri/pull/11305) by [@amrbashir](https://www.github.com/tauri-apps/tauri/../../amrbashir)) Add Deno support in tauri-cli operations.
+
+### Dependencies
+
+- Upgraded to `tauri-cli@1.6.3`
+
+## \[1.6.2]
+
+### Dependencies
+
+- Upgraded to `tauri-cli@1.6.2`
+
+## \[1.6.1]
+
+### New Features
+
+- [`0aa0378c8`](https://www.github.com/tauri-apps/tauri/commit/0aa0378c8d632ce186ddd5df8b4bddd8853ceeaf) ([#10199](https://www.github.com/tauri-apps/tauri/pull/10199) by [@FabianLars](https://www.github.com/tauri-apps/tauri/../../FabianLars)) Added a configuration option to disable hardened runtime on macOS codesign.
+
+### Bug Fixes
+
+- [`212001c1d`](https://www.github.com/tauri-apps/tauri/commit/212001c1dfda1497c870eb91087cfb190f433e57) ([#10233](https://www.github.com/tauri-apps/tauri/pull/10233) by [@github-actions](https://www.github.com/tauri-apps/tauri/../../github-actions)) Fix cli failing to rename application when using cargo `--target-dir` flag with `tauri build` or `tauri dev`
+
+### Dependencies
+
+- Upgraded to `tauri-cli@1.6.1`
+
 ## \[1.6.0]
 
 ### New Features

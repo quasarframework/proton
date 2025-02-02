@@ -426,7 +426,7 @@ mod pkgconfig_utils {
       if !output.stdout.is_empty() {
         // output would be "-L/path/to/library\n"
         let word = output.stdout[2..].to_vec();
-        return Some(String::from_utf8_lossy(&word).trim().to_string());
+        Some(String::from_utf8_lossy(&word).trim().to_string())
       } else {
         None
       }

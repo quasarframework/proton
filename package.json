@@ -16,11 +16,11 @@
    "postinstall": "husky install"
   },
   "devDependencies": {
-    "covector": "^0.7.3",
-    "husky": "^6.0.0",
-    "prettier": "^2.5.1"
+    "covector": "^0.12.3",
+    "husky": "^9.0.0",
+    "prettier": "^3.0.0"
   },
   "dependencies": {
-    "typescript": "^4.5.4"
+    "typescript": "^5.0.0"
   }
 }

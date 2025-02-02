@@ -5,6 +5,7 @@
 //! Types and functions related to desktop notifications.
 
 #[cfg(windows)]
+#[allow(unused_imports)]
 use std::path::MAIN_SEPARATOR as SEP;
 
 /// The desktop notification definition.

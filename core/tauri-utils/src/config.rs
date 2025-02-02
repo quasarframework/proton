@@ -311,7 +311,7 @@ pub struct RpmConfig {
   /// in order for the package to be installed.
   pub conflicts: Option<Vec<String>>,
   /// The list of RPM dependencies your application supersedes - if this package is installed,
-  /// packages listed as “obsoletes” will be automatically removed (if they are present).
+  /// packages listed as "obsoletes" will be automatically removed (if they are present).
   pub obsoletes: Option<Vec<String>>,
   /// The RPM release tag.
   #[serde(default = "default_release")]
@@ -579,7 +579,7 @@ pub struct WixConfig {
   pub banner_path: Option<PathBuf>,
   /// Path to a bitmap file to use on the installation user interface dialogs.
   /// It is used on the welcome and completion dialogs.
-
+  ///
   /// The required dimensions are 493px × 312px.
   #[serde(alias = "dialog-image-path")]
   pub dialog_image_path: Option<PathBuf>,
@@ -847,7 +847,7 @@ pub struct BundleConfig {
   /// The application identifier in reverse domain name notation (e.g. `com.tauri.example`).
   /// This string must be unique across applications since it is used in system configurations like
   /// the bundle ID and path to the webview data directory.
-  /// This string must contain only alphanumeric characters (A–Z, a–z, and 0–9), hyphens (-),
+  /// This string must contain only alphanumeric characters (A-Z, a-z, and 0-9), hyphens (-),
   /// and periods (.).
   pub identifier: String,
   /// The application's publisher. Defaults to the second element in the identifier string.
@@ -3073,7 +3073,7 @@ impl<'d> serde::Deserialize<'d> for PackageVersion {
   fn deserialize<D: Deserializer<'d>>(deserializer: D) -> Result<PackageVersion, D::Error> {
     struct PackageVersionVisitor;
 
-    impl<'d> Visitor<'d> for PackageVersionVisitor {
+    impl Visitor<'_> for PackageVersionVisitor {
       type Value = PackageVersion;
 
       fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {

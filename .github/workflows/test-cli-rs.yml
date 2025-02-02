@@ -37,7 +37,7 @@ jobs:
       - name: install stable
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: 1.71.0
           override: true
 
       - name: install Linux dependencies

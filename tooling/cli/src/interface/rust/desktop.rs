@@ -101,7 +101,7 @@ pub fn build(
 
   let bin_name = bin_path.file_stem().unwrap();
 
-  if !std::env::var("STATIC_VCRUNTIME").map_or(false, |v| v == "false") {
+  if !std::env::var("STATIC_VCRUNTIME").is_ok_and(|v| v == "false") {
     std::env::set_var("STATIC_VCRUNTIME", "true");
   }
 

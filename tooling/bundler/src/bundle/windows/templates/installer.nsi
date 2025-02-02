@@ -20,7 +20,6 @@ ${StrLoc}
 !define PRODUCTNAME "{{product_name}}"
 !define VERSION "{{version}}"
 !define VERSIONWITHBUILD "{{version_with_build}}"
-!define SHORTDESCRIPTION "{{short_description}}"
 !define INSTALLMODE "{{install_mode}}"
 !define LICENSE "{{license}}"
 !define INSTALLERICON "{{installer_icon}}"
@@ -50,7 +49,7 @@ OutFile "${OUTFILE}"
 
 VIProductVersion "${VERSIONWITHBUILD}"
 VIAddVersionKey "ProductName" "${PRODUCTNAME}"
-VIAddVersionKey "FileDescription" "${SHORTDESCRIPTION}"
+VIAddVersionKey "FileDescription" "${PRODUCTNAME}"
 VIAddVersionKey "LegalCopyright" "${COPYRIGHT}"
 VIAddVersionKey "FileVersion" "${VERSION}"
 VIAddVersionKey "ProductVersion" "${VERSION}"
@@ -458,7 +457,7 @@ Section WebView2
     DetailPrint "$(webview2Downloading)"
     NSISdl::download "https://go.microsoft.com/fwlink/p/?LinkId=2124703" "$TEMP\MicrosoftEdgeWebview2Setup.exe"
     Pop $0
-    ${If} $0 == 0
+    ${If} $0 == "success"
       DetailPrint "$(webview2DownloadSuccess)"
     ${Else}
       DetailPrint "$(webview2DownloadError)"
@@ -570,6 +569,9 @@ Section Install
     ; or when uninstalling
     WriteRegStr SHCTX "${UNINSTKEY}" $MultiUser.InstallMode 1
   !endif
+
+  ; Save current MAINBINARYNAME for future updates from v2 updater
+  WriteRegStr SHCTX "${UNINSTKEY}" "MainBinaryName" "${MAINBINARYNAME}.exe"
 
   ; Registry information for add/remove programs
   WriteRegStr SHCTX "${UNINSTKEY}" "DisplayName" "${PRODUCTNAME}"

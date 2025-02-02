@@ -1,5 +1,49 @@
 # Changelog
 
+## \[1.7.3]
+
+### Dependencies
+
+- Upgraded to `tauri-utils@1.6.2`
+
+## \[1.7.2]
+
+### Bug Fixes
+
+- [`a5f045e52`](https://www.github.com/tauri-apps/tauri/commit/a5f045e527b1d918ef1894ce4ab63e929c43135f) ([#11404](https://www.github.com/tauri-apps/tauri/pull/11404) by [@amrbashir](https://www.github.com/tauri-apps/tauri/../../amrbashir)) Fix bundler trying to sign binaries for Windows build when actually building for macOS or Linux.
+
+## \[1.7.1]
+
+### Bug Fixes
+
+- [`019f94f12`](https://www.github.com/tauri-apps/tauri/commit/019f94f1284eebdf4fd72c4d1ca6ae096f09449d) ([#11131](https://www.github.com/tauri-apps/tauri/pull/11131) by [@0rvar](https://www.github.com/tauri-apps/tauri/../../0rvar)) Fix NSIS installer failing to determine whether webview installer downloaded correctly or not.
+
+## \[1.7.0]
+
+### New Features
+
+- [`298f8ca58`](https://www.github.com/tauri-apps/tauri/commit/298f8ca584a5d6c900a11d01c91a0b4a4a3e0014) ([#10952](https://www.github.com/tauri-apps/tauri/pull/10952) by [@amrbashir](https://www.github.com/tauri-apps/tauri/../../amrbashir)) Store main binary name in registry for NSIS installer. This will be used in future app updates to detect main binary name changes.
+- [`14443a131`](https://www.github.com/tauri-apps/tauri/commit/14443a13190fe006aedc96176e970f9ec8644c13) ([#10966](https://www.github.com/tauri-apps/tauri/pull/10966) by [@amrbashir](https://www.github.com/tauri-apps/tauri/../../amrbashir)) Add `AUTOLAUNCHAPP` and `LAUNCHAPPARGS` properties to MSI installer, which can be used by updater to instruct launching the app after update and maintain the passed CLI arguments.
+
+### Bug Fixes
+
+- [`2e87e85f8`](https://www.github.com/tauri-apps/tauri/commit/2e87e85f8550eccf2a3b23a36b135f3ad682509e) ([#10976](https://www.github.com/tauri-apps/tauri/pull/10976) by [@FabianLars](https://www.github.com/tauri-apps/tauri/../../FabianLars)) The executable and NSIS installer on Windows will now use the `productName` config for the `FileDescription` property instead of `shortDescription`.
+
+## \[1.6.1]
+
+### New Features
+
+- [`0aa0378c8`](https://www.github.com/tauri-apps/tauri/commit/0aa0378c8d632ce186ddd5df8b4bddd8853ceeaf) ([#10199](https://www.github.com/tauri-apps/tauri/pull/10199) by [@FabianLars](https://www.github.com/tauri-apps/tauri/../../FabianLars)) Added a configuration option to disable hardened runtime on macOS codesign.
+
+### Bug Fixes
+
+- [`297cd55c4`](https://www.github.com/tauri-apps/tauri/commit/297cd55c442679b34df14fc8aaf2b03e4846f706) ([#10499](https://www.github.com/tauri-apps/tauri/pull/10499) by [@github-actions](https://www.github.com/tauri-apps/tauri/../../github-actions)) Changed the MSRV in Cargo.toml for `tauri-bundler` and `tauri-cli` to 1.71. The crates effectively required 1.70/1.71 to build for a while already.
+- [`1c2ff8133`](https://www.github.com/tauri-apps/tauri/commit/1c2ff81335332870556a7a30c25e0dca8c076448) ([#10183](https://www.github.com/tauri-apps/tauri/pull/10183) by [@amrbashir](https://www.github.com/tauri-apps/tauri/../../amrbashir)) Fix NSIS installer failing to launch apps that contain spaces after installation.
+
+### Dependencies
+
+- Upgraded to `tauri-utils@1.6.1`
+
 ## \[1.6.0]
 
 ### New Features

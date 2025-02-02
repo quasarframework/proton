@@ -1,5 +1,29 @@
 # Changelog
 
+## \[1.5.6]
+
+### Dependencies
+
+- Upgraded to `tauri-utils@1.6.2`
+- Upgraded to `tauri-codegen@1.4.6`
+
+## \[1.5.5]
+
+### Bug Fixes
+
+- [`2e87e85f8`](https://www.github.com/tauri-apps/tauri/commit/2e87e85f8550eccf2a3b23a36b135f3ad682509e) ([#10976](https://www.github.com/tauri-apps/tauri/pull/10976) by [@FabianLars](https://www.github.com/tauri-apps/tauri/../../FabianLars)) The executable and NSIS installer on Windows will now use the `productName` config for the `FileDescription` property instead of `shortDescription`.
+
+## \[1.5.4]
+
+### What's Changed
+
+- [`fbcbc5ef7`](https://www.github.com/tauri-apps/tauri/commit/fbcbc5ef7cb5e3a69e3c23d6af24c8d340ae5f6b) ([#10392](https://www.github.com/tauri-apps/tauri/pull/10392) by [@github-actions](https://www.github.com/tauri-apps/tauri/../../github-actions)) Emit `cargo:rustc-check-cfg` instruction so Cargo validates custom cfg attributes on Rust 1.80 (or nightly-2024-05-05).
+
+### Dependencies
+
+- Upgraded to `tauri-codegen@1.4.5`
+- Upgraded to `tauri-utils@1.6.1`
+
 ## \[1.5.3]
 
 ### Dependencies

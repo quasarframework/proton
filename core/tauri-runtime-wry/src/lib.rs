@@ -5,7 +5,11 @@
 //! The [`wry`] Tauri [`Runtime`].
 
 use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle};
-use std::{collections::BTreeMap, rc::Rc};
+use std::{
+  collections::BTreeMap,
+  rc::Rc,
+  sync::atomic::{AtomicBool, Ordering},
+};
 use tauri_runtime::{
   http::{header::CONTENT_TYPE, Request as HttpRequest, RequestParts, Response as HttpResponse},
   menu::{AboutMetadata, CustomMenuItem, Menu, MenuEntry, MenuHash, MenuId, MenuItem, MenuUpdate},
@@ -196,6 +200,7 @@ pub struct Context<T: UserEvent> {
   main_thread_id: ThreadId,
   pub proxy: WryEventLoopProxy<Message<T>>,
   main_thread: DispatcherMainThreadContext<T>,
+  pub is_event_loop_ready: Arc<AtomicBool>,
 }
 
 impl<T: UserEvent> Context<T> {
@@ -211,35 +216,37 @@ impl<T: UserEvent> Context<T> {
   }
 }
 
-impl<T: UserEvent> Context<T> {
-  fn create_webview(&self, pending: PendingWindow<T, Wry<T>>) -> Result<DetachedWindow<T, Wry<T>>> {
-    let label = pending.label.clone();
-    let menu_ids = pending.menu_ids.clone();
-    let js_event_listeners = pending.js_event_listeners.clone();
-    let context = self.clone();
-    let window_id = rand::random();
+fn context_create_webview<T: UserEvent>(
+  context: Context<T>,
+  pending: PendingWindow<T, Wry<T>>,
+) -> Result<DetachedWindow<T, Wry<T>>> {
+  let label = pending.label.clone();
+  let menu_ids = pending.menu_ids.clone();
+  let js_event_listeners = pending.js_event_listeners.clone();
 
-    send_user_message(
-      self,
-      Message::CreateWebview(
-        window_id,
-        Box::new(move |event_loop, web_context| {
-          create_webview(window_id, event_loop, web_context, context, pending)
-        }),
-      ),
-    )?;
+  let window_id = rand::random();
 
-    let dispatcher = WryDispatcher {
+  let context_ = context.clone();
+  send_user_message(
+    &context,
+    Message::CreateWebview(
       window_id,
-      context: self.clone(),
-    };
-    Ok(DetachedWindow {
-      label,
-      dispatcher,
-      menu_ids,
-      js_event_listeners,
-    })
-  }
+      Box::new(move |event_loop, web_context| {
+        create_webview(window_id, event_loop, web_context, context_, pending)
+      }),
+    ),
+  )?;
+
+  let dispatcher = WryDispatcher {
+    window_id,
+    context: context.clone(),
+  };
+  Ok(DetachedWindow {
+    label,
+    dispatcher,
+    menu_ids,
+    js_event_listeners,
+  })
 }
 
 #[cfg(feature = "tracing")]
@@ -281,7 +288,7 @@ pub struct DispatcherMainThreadContext<T: UserEvent> {
   pub window_target: EventLoopWindowTarget<Message<T>>,
   pub web_context: WebContextStore,
   #[cfg(all(desktop, feature = "global-shortcut"))]
-  pub global_shortcut_manager: Rc<Mutex<WryShortcutManager>>,
+  pub global_shortcut_manager: Arc<Mutex<WryShortcutManager>>,
   // changing this to an Rc will cause frequent app crashes.
   pub windows: Arc<WindowsStore>,
   #[cfg(all(desktop, feature = "system-tray"))]
@@ -1452,7 +1459,7 @@ impl<T: UserEvent> Dispatch<T> for WryDispatcher<T> {
     &mut self,
     pending: PendingWindow<T, Self::Runtime>,
   ) -> Result<DetachedWindow<T, Self::Runtime>> {
-    self.context.create_webview(pending)
+    context_create_webview(self.context.clone(), pending)
   }
 
   fn set_resizable(&self, resizable: bool) -> Result<()> {
@@ -1833,7 +1840,11 @@ pub struct Wry<T: UserEvent> {
   clipboard_manager_handle: ClipboardManagerWrapper,
 
   event_loop: EventLoop<Message<T>>,
+
+  pending_ready_tasks: RefCell<Vec<PendingReadyTask<T>>>,
 }
+
+type PendingReadyTask<T> = Box<dyn FnOnce(&EventLoopWindowTarget<Message<T>>)>;
 
 impl<T: UserEvent> fmt::Debug for Wry<T> {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -1927,7 +1938,7 @@ impl<T: UserEvent> RuntimeHandle<T> for WryHandle<T> {
     &self,
     pending: PendingWindow<T, Self::Runtime>,
   ) -> Result<DetachedWindow<T, Self::Runtime>> {
-    self.context.create_webview(pending)
+    context_create_webview(self.context.clone(), pending)
   }
 
   fn run_on_main_thread<F: FnOnce() + Send + 'static>(&self, f: F) -> Result<()> {
@@ -1950,6 +1961,8 @@ impl<T: UserEvent> RuntimeHandle<T> for WryHandle<T> {
       context: self.context.clone(),
       id,
       proxy: self.context.proxy.clone(),
+      #[allow(clippy::arc_with_non_send_sync)]
+      pending: PendingSystemTray(Arc::new(RefCell::new(None))),
     })
   }
 
@@ -1980,7 +1993,7 @@ impl<T: UserEvent> Wry<T> {
     let web_context = WebContextStore::default();
 
     #[cfg(all(desktop, feature = "global-shortcut"))]
-    let global_shortcut_manager = Rc::new(Mutex::new(WryShortcutManager::new(&event_loop)));
+    let global_shortcut_manager = Arc::new(Mutex::new(WryShortcutManager::new(&event_loop)));
 
     let windows = Arc::new(WindowsStore(RefCell::new(BTreeMap::default())));
 
@@ -2004,6 +2017,7 @@ impl<T: UserEvent> Wry<T> {
         #[cfg(feature = "tracing")]
         active_tracing_spans: Default::default(),
       },
+      is_event_loop_ready: Arc::new(AtomicBool::new(false)),
     };
 
     #[cfg(all(desktop, feature = "global-shortcut"))]
@@ -2031,6 +2045,8 @@ impl<T: UserEvent> Wry<T> {
       clipboard_manager_handle,
 
       event_loop,
+
+      pending_ready_tasks: RefCell::new(Vec::new()),
     })
   }
 
@@ -2127,33 +2143,48 @@ impl<T: UserEvent> Runtime<T> for Wry<T> {
   }
 
   #[cfg(all(desktop, feature = "system-tray"))]
-  fn system_tray(&self, mut system_tray: SystemTray) -> Result<Self::TrayHandler> {
+  fn system_tray(&self, system_tray: SystemTray) -> Result<Self::TrayHandler> {
+    let system_tray_manager = self.context.main_thread.system_tray_manager.clone();
+
     let id = system_tray.id;
-    let mut listeners = Vec::new();
-    if let Some(l) = system_tray.on_event.take() {
-      listeners.push(Rc::new(l));
-    }
-    let (tray, items) = create_tray(WryTrayId(id), system_tray, &self.event_loop)?;
+    #[allow(clippy::arc_with_non_send_sync)]
+    let pending = PendingSystemTray(Arc::new(RefCell::new(Some(system_tray))));
+
+    let pending_ = pending.clone();
     self
-      .context
-      .main_thread
-      .system_tray_manager
-      .trays
-      .lock()
-      .unwrap()
-      .insert(
-        id,
-        TrayContext {
-          tray: Rc::new(RefCell::new(Some(tray))),
-          listeners: Rc::new(RefCell::new(listeners)),
-          items: Rc::new(RefCell::new(items)),
-        },
-      );
+      .pending_ready_tasks
+      .borrow_mut()
+      .push(Box::new(move |event_loop| {
+        if let Some(mut system_tray) = pending_.0.borrow_mut().take() {
+          let mut listeners = Vec::new();
+          if let Some(l) = system_tray.on_event.take() {
+            #[allow(clippy::arc_with_non_send_sync)]
+            listeners.push(Arc::new(l));
+          }
+
+          match create_tray(WryTrayId(id), system_tray, event_loop) {
+            Ok((tray, items)) => {
+              system_tray_manager.trays.lock().unwrap().insert(
+                id,
+                TrayContext {
+                  tray: Arc::new(TrayCell(RefCell::new(Some(tray)))),
+                  listeners: Arc::new(TrayListenersCell(RefCell::new(listeners))),
+                  items: Arc::new(TrayItemsCell(RefCell::new(items))),
+                },
+              );
+            }
+            Err(e) => {
+              eprintln!("failed to build tray: {e}");
+            }
+          }
+        }
+      }));
 
     Ok(SystemTrayHandle {
       context: self.context.clone(),
       id,
-      proxy: self.event_loop.create_proxy(),
+      proxy: self.context.proxy.clone(),
+      pending,
     })
   }
 
@@ -2207,6 +2238,11 @@ impl<T: UserEvent> Runtime<T> for Wry<T> {
     #[cfg(all(desktop, feature = "system-tray"))]
     let system_tray_manager = self.context.main_thread.system_tray_manager.clone();
 
+    let is_event_loop_ready = self.context.is_event_loop_ready.clone();
+    is_event_loop_ready.store(false, Ordering::Relaxed);
+
+    let pending_ready_tasks = &self.pending_ready_tasks;
+
     #[cfg(feature = "tracing")]
     let active_tracing_spans = self.context.main_thread.active_tracing_spans.clone();
 
@@ -2245,6 +2281,8 @@ impl<T: UserEvent> Runtime<T> for Wry<T> {
               system_tray_manager: system_tray_manager.clone(),
               #[cfg(feature = "tracing")]
               active_tracing_spans: active_tracing_spans.clone(),
+              pending_ready_tasks,
+              is_event_loop_ready: is_event_loop_ready.clone(),
             },
             web_context,
           );
@@ -2269,6 +2307,8 @@ impl<T: UserEvent> Runtime<T> for Wry<T> {
             system_tray_manager: system_tray_manager.clone(),
             #[cfg(feature = "tracing")]
             active_tracing_spans: active_tracing_spans.clone(),
+            pending_ready_tasks,
+            is_event_loop_ready: is_event_loop_ready.clone(),
           },
           web_context,
         );
@@ -2280,14 +2320,16 @@ impl<T: UserEvent> Runtime<T> for Wry<T> {
   fn run<F: FnMut(RunEvent<T>) + 'static>(self, mut callback: F) {
     let windows = self.context.main_thread.windows.clone();
     let webview_id_map = self.context.webview_id_map.clone();
-    let web_context = self.context.main_thread.web_context;
+    let web_context = self.context.main_thread.web_context.clone();
+    let is_event_loop_ready = self.context.is_event_loop_ready.clone();
+    let pending_ready_tasks = self.pending_ready_tasks;
     let mut plugins = self.plugins;
 
     #[cfg(feature = "tracing")]
     let active_tracing_spans = self.context.main_thread.active_tracing_spans.clone();
 
     #[cfg(all(desktop, feature = "system-tray"))]
-    let system_tray_manager = self.context.main_thread.system_tray_manager;
+    let system_tray_manager = self.context.main_thread.system_tray_manager.clone();
 
     #[cfg(all(desktop, feature = "global-shortcut"))]
     let global_shortcut_manager = self.context.main_thread.global_shortcut_manager.clone();
@@ -2315,6 +2357,8 @@ impl<T: UserEvent> Runtime<T> for Wry<T> {
             system_tray_manager: system_tray_manager.clone(),
             #[cfg(feature = "tracing")]
             active_tracing_spans: active_tracing_spans.clone(),
+            pending_ready_tasks: &pending_ready_tasks,
+            is_event_loop_ready: is_event_loop_ready.clone(),
           },
           &web_context,
         );
@@ -2338,6 +2382,8 @@ impl<T: UserEvent> Runtime<T> for Wry<T> {
           system_tray_manager: system_tray_manager.clone(),
           #[cfg(feature = "tracing")]
           active_tracing_spans: active_tracing_spans.clone(),
+          pending_ready_tasks: &pending_ready_tasks,
+          is_event_loop_ready: is_event_loop_ready.clone(),
         },
         &web_context,
       );
@@ -2350,20 +2396,22 @@ pub struct EventLoopIterationContext<'a, T: UserEvent> {
   pub webview_id_map: WebviewIdStore,
   pub windows: Arc<WindowsStore>,
   #[cfg(all(desktop, feature = "global-shortcut"))]
-  pub global_shortcut_manager: Rc<Mutex<WryShortcutManager>>,
+  pub global_shortcut_manager: Arc<Mutex<WryShortcutManager>>,
   #[cfg(all(desktop, feature = "global-shortcut"))]
   pub global_shortcut_manager_handle: &'a GlobalShortcutManagerHandle<T>,
   #[cfg(all(desktop, feature = "system-tray"))]
   pub system_tray_manager: SystemTrayManager,
   #[cfg(feature = "tracing")]
   pub active_tracing_spans: ActiveTraceSpanStore,
+  pub is_event_loop_ready: Arc<AtomicBool>,
+  pub pending_ready_tasks: &'a RefCell<Vec<PendingReadyTask<T>>>,
 }
 
 struct UserMessageContext {
   windows: Arc<WindowsStore>,
   webview_id_map: WebviewIdStore,
   #[cfg(all(desktop, feature = "global-shortcut"))]
-  global_shortcut_manager: Rc<Mutex<WryShortcutManager>>,
+  global_shortcut_manager: Arc<Mutex<WryShortcutManager>>,
   #[cfg(all(desktop, feature = "system-tray"))]
   system_tray_manager: SystemTrayManager,
 }
@@ -2703,16 +2751,17 @@ fn handle_user_message<T: UserEvent>(
       if let TrayMessage::Create(mut tray, tx) = tray_message {
         let mut listeners = Vec::new();
         if let Some(l) = tray.on_event.take() {
-          listeners.push(Rc::new(l));
+          #[allow(clippy::arc_with_non_send_sync)]
+          listeners.push(Arc::new(l));
         }
         match create_tray(WryTrayId(tray_id), tray, event_loop) {
           Ok((tray, items)) => {
             trays.insert(
               tray_id,
               TrayContext {
-                tray: Rc::new(RefCell::new(Some(tray))),
-                listeners: Rc::new(RefCell::new(listeners)),
-                items: Rc::new(RefCell::new(items)),
+                tray: Arc::new(TrayCell(RefCell::new(Some(tray)))),
+                listeners: Arc::new(TrayListenersCell(RefCell::new(listeners))),
+                items: Arc::new(TrayItemsCell(RefCell::new(items))),
               },
             );
 
@@ -2726,7 +2775,7 @@ fn handle_user_message<T: UserEvent>(
       } else if let Some(tray_context) = trays.get(&tray_id) {
         match tray_message {
           TrayMessage::UpdateItem(menu_id, update) => {
-            let mut tray = tray_context.items.as_ref().borrow_mut();
+            let mut tray = tray_context.items.as_ref().0.borrow_mut();
             let item = tray.get_mut(&menu_id).expect("menu item not found");
             match update {
               MenuUpdate::SetEnabled(enabled) => item.set_enabled(enabled),
@@ -2739,14 +2788,14 @@ fn handle_user_message<T: UserEvent>(
             }
           }
           TrayMessage::UpdateMenu(menu) => {
-            if let Some(tray) = &mut *tray_context.tray.borrow_mut() {
+            if let Some(tray) = &mut *tray_context.tray.0.borrow_mut() {
               let mut items = HashMap::new();
               tray.set_menu(&to_wry_context_menu(&mut items, menu));
-              *tray_context.items.borrow_mut() = items;
+              *tray_context.items.0.borrow_mut() = items;
             }
           }
           TrayMessage::UpdateIcon(icon) => {
-            if let Some(tray) = &mut *tray_context.tray.borrow_mut() {
+            if let Some(tray) = &mut *tray_context.tray.0.borrow_mut() {
               if let Ok(icon) = TrayIcon::try_from(icon) {
                 tray.set_icon(icon.0);
               }
@@ -2754,18 +2803,18 @@ fn handle_user_message<T: UserEvent>(
           }
           #[cfg(target_os = "macos")]
           TrayMessage::UpdateIconAsTemplate(is_template) => {
-            if let Some(tray) = &mut *tray_context.tray.borrow_mut() {
+            if let Some(tray) = &mut *tray_context.tray.0.borrow_mut() {
               tray.set_icon_as_template(is_template);
             }
           }
           #[cfg(target_os = "macos")]
           TrayMessage::UpdateTitle(title) => {
-            if let Some(tray) = &mut *tray_context.tray.borrow_mut() {
+            if let Some(tray) = &mut *tray_context.tray.0.borrow_mut() {
               tray.set_title(&title);
             }
           }
           TrayMessage::UpdateTooltip(tooltip) => {
-            if let Some(tray) = &mut *tray_context.tray.borrow_mut() {
+            if let Some(tray) = &mut *tray_context.tray.0.borrow_mut() {
               tray.set_tooltip(&tooltip);
             }
           }
@@ -2773,9 +2822,9 @@ fn handle_user_message<T: UserEvent>(
             // already handled
           }
           TrayMessage::Destroy(tx) => {
-            *tray_context.tray.borrow_mut() = None;
-            tray_context.listeners.borrow_mut().clear();
-            tray_context.items.borrow_mut().clear();
+            *tray_context.tray.0.borrow_mut() = None;
+            tray_context.listeners.0.borrow_mut().clear();
+            tray_context.items.0.borrow_mut().clear();
             tx.send(Ok(())).unwrap();
           }
         }
@@ -2813,6 +2862,8 @@ fn handle_event_loop<T: UserEvent>(
     system_tray_manager,
     #[cfg(feature = "tracing")]
     active_tracing_spans,
+    is_event_loop_ready,
+    pending_ready_tasks,
   } = context;
   if *control_flow != ControlFlow::Exit {
     *control_flow = ControlFlow::Wait;
@@ -2820,6 +2871,11 @@ fn handle_event_loop<T: UserEvent>(
 
   match event {
     Event::NewEvents(StartCause::Init) => {
+      is_event_loop_ready.store(true, Ordering::Relaxed);
+      for task in pending_ready_tasks.replace(Vec::new()) {
+        task(event_loop);
+      }
+
       callback(RunEvent::Ready);
     }
 
@@ -2905,11 +2961,11 @@ fn handle_event_loop<T: UserEvent>(
       let (mut listeners, mut tray_id) = (None, 0);
       for (id, tray_context) in trays_iter {
         let has_menu = {
-          let items = tray_context.items.borrow();
+          let items = tray_context.items.0.borrow();
           items.contains_key(&menu_id.0)
         };
         if has_menu {
-          listeners.replace(tray_context.listeners.borrow().clone());
+          listeners.replace(tray_context.listeners.0.borrow().clone());
           tray_id = *id;
           break;
         }
@@ -2948,7 +3004,7 @@ fn handle_event_loop<T: UserEvent>(
       };
       let trays = system_tray_manager.trays.lock().unwrap();
       if let Some(tray_context) = trays.get(&id.0) {
-        let listeners = tray_context.listeners.borrow();
+        let listeners = tray_context.listeners.0.borrow();
         let iter = listeners.iter();
         for handler in iter {
           handler(&event);

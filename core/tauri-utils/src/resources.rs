@@ -126,7 +126,7 @@ impl Resource {
   }
 }
 
-impl<'a> Iterator for ResourcePaths<'a> {
+impl Iterator for ResourcePaths<'_> {
   type Item = crate::Result<PathBuf>;
 
   fn next(&mut self) -> Option<crate::Result<PathBuf>> {
@@ -148,7 +148,7 @@ fn normalize(path: &Path) -> PathBuf {
   dest
 }
 
-impl<'a> Iterator for ResourcePathsIter<'a> {
+impl Iterator for ResourcePathsIter<'_> {
   type Item = crate::Result<Resource>;
 
   fn next(&mut self) -> Option<crate::Result<Resource>> {

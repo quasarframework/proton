@@ -1,6 +1,6 @@
 {
   "name": "@tauri-apps/cli",
-  "version": "1.6.0",
+  "version": "1.6.5",
   "description": "Command line interface for building Tauri apps",
   "funding": {
     "type": "opencollective",
@@ -38,17 +38,18 @@
     }
   },
   "devDependencies": {
-    "@napi-rs/cli": "2.16.1",
+    "@napi-rs/cli": "2.18.4",
     "cross-env": "7.0.3",
-    "cross-spawn": "7.0.3",
-    "fs-extra": "11.1.1",
+    "cross-spawn": "7.0.6",
+    "fs-extra": "11.3.0",
     "jest": "29.7.0",
     "jest-transform-toml": "1.0.0",
-    "prettier": "2.8.8"
+    "prettier": "3.4.2"
   },
   "resolutions": {
     "semver": ">=7.5.2",
-    "braces": "3.0.3"
+    "braces": "3.0.3",
+    "cross-spawn": ">=7.0.6"
   },
   "engines": {
     "node": ">= 10"
@@ -67,5 +68,8 @@
     "tauri": "node ./tauri.js",
     "format": "prettier --write ./package.json ./tauri.js",
     "format:check": "prettier --check ./package.json ./tauri.js"
+  },
+  "dependencies": {
+    "semver": ">=7.5.2"
   }
 }

@@ -1,5 +1,54 @@
 # Changelog
 
+## \[1.6.5]
+
+### Dependencies
+
+- Upgraded to `tauri-utils@1.6.2`
+- Upgraded to `tauri-bundler@1.7.3`
+
+## \[1.6.4]
+
+### Bug Fixes
+
+- [`a5f045e52`](https://www.github.com/tauri-apps/tauri/commit/a5f045e527b1d918ef1894ce4ab63e929c43135f) ([#11404](https://www.github.com/tauri-apps/tauri/pull/11404) by [@amrbashir](https://www.github.com/tauri-apps/tauri/../../amrbashir)) Fix bundler trying to sign binaries for Windows build when actually building for macOS or Linux.
+
+### Dependencies
+
+- Upgraded to `tauri-bundler@1.7.2`
+
+## \[1.6.3]
+
+### New Features
+
+- [`343b11d7c`](https://www.github.com/tauri-apps/tauri/commit/343b11d7c775fc01aa6ff8ab517fd1edd7e483ca) ([#11305](https://www.github.com/tauri-apps/tauri/pull/11305) by [@amrbashir](https://www.github.com/tauri-apps/tauri/../../amrbashir)) Add Deno support in tauri-cli operations.
+
+### Dependencies
+
+- Upgraded to `tauri-bundler@1.7.1`
+
+## \[1.6.2]
+
+### Dependencies
+
+- Upgraded to `tauri-bundler@1.7.0`
+
+## \[1.6.1]
+
+### New Features
+
+- [`0aa0378c8`](https://www.github.com/tauri-apps/tauri/commit/0aa0378c8d632ce186ddd5df8b4bddd8853ceeaf) ([#10199](https://www.github.com/tauri-apps/tauri/pull/10199) by [@FabianLars](https://www.github.com/tauri-apps/tauri/../../FabianLars)) Added a configuration option to disable hardened runtime on macOS codesign.
+
+### Bug Fixes
+
+- [`297cd55c4`](https://www.github.com/tauri-apps/tauri/commit/297cd55c442679b34df14fc8aaf2b03e4846f706) ([#10499](https://www.github.com/tauri-apps/tauri/pull/10499) by [@github-actions](https://www.github.com/tauri-apps/tauri/../../github-actions)) Changed the MSRV in Cargo.toml for `tauri-bundler` and `tauri-cli` to 1.71. The crates effectively required 1.70/1.71 to build for a while already.
+- [`212001c1d`](https://www.github.com/tauri-apps/tauri/commit/212001c1dfda1497c870eb91087cfb190f433e57) ([#10233](https://www.github.com/tauri-apps/tauri/pull/10233) by [@github-actions](https://www.github.com/tauri-apps/tauri/../../github-actions)) Fix cli failing to rename application when using cargo `--target-dir` flag with `tauri build` or `tauri dev`
+
+### Dependencies
+
+- Upgraded to `tauri-bundler@1.6.1`
+- Upgraded to `tauri-utils@1.6.1`
+
 ## \[1.6.0]
 
 ### New Features

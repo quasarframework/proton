@@ -4,7 +4,10 @@
 
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use std::time::Duration;
+
 fn main() {
+  eprintln!("running tauri v1 app...");
   let mut context = tauri::generate_context!();
   if std::env::var("TARGET").unwrap_or_default() == "nsis" {
     // /D sets the default installation directory ($INSTDIR),
@@ -23,17 +26,26 @@ fn main() {
   }
   tauri::Builder::default()
     .setup(|app| {
+      println!("current version: {}", app.package_info().version);
       let handle = app.handle();
       tauri::async_runtime::spawn(async move {
-        match handle.updater().check().await {
+        match handle
+          .updater()
+          .timeout(Duration::from_secs(15))
+          .check()
+          .await
+        {
           Ok(update) => {
+            println!("got update {}", update.latest_version());
             if update.is_update_available() {
               if let Err(e) = update.download_and_install().await {
                 println!("{e}");
                 std::process::exit(1);
               }
+              std::process::exit(0);
+            } else {
+              std::process::exit(2);
             }
-            std::process::exit(0);
           }
           Err(e) => {
             println!("{e}");
