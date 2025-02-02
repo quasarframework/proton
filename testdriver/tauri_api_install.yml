@@ -1,0 +1,39 @@
+version: 4.1.58
+session: 679ff568a1ad2d40a789f778
+steps:
+  - prompt: Click next in the Tauri API Setup
+    commands:
+      - command: focus-application
+        name: Tauri API Setup
+      - command: hover-text
+        text: Next >
+        description: next button in the Tauri API Setup
+        action: click
+  - prompt: Click next again in the Tauri API Setup
+    commands:
+      - command: focus-application
+        name: Tauri API
+      - command: hover-text
+        text: Next >
+        description: next button in the Tauri API Setup
+        action: click
+  - prompt: Click Next again in the Tauri API Setup
+    commands:
+      - command: focus-application
+        name: Tauri API
+      - command: hover-text
+        text: Next >
+        description: next button in the Tauri API Setup
+        action: click
+  - prompt: Click Finish in Tauri API Setup
+    commands:
+      - command: focus-application
+        name: Tauri API
+      - command: hover-text
+        text: Finish
+        description: finish button in the Tauri API Setup
+        action: click
+  - prompt: assert that the Tauri API program is open
+    commands:
+      - command: assert
+        expect: the Tauri API program is open
