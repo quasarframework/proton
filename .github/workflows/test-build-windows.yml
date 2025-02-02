@@ -15,23 +15,21 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - run: corepack enable
       - name: Setup node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
           architecture: x64
-      - name: Disable Corepack
-        run: corepack disable
-      - name: Install Specific pnpm Version
-        run: |
-          npm install -g pnpm@8.15.4
-          echo "Adding pnpm to PATH"
-          echo "$(npm bin -g)" >> $GITHUB_PATH
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: x86_64-pc-windows-msvc
+      - name: Install pnpm
+        run: |
+          npm install -g pnpm@8.15.4
+          echo "pnpm installed successfully"
       - name: Install dependencies
         run: pnpm i --frozen-lockfile --ignore-scripts
       - name: Build CLI
@@ -60,7 +58,7 @@ jobs:
                 Authorization = "token ${{ secrets.GITHUB_TOKEN }}"
             }
             $downloadFolder = "./download"
-            $artifactFileName = "app.exe"  # Change this to match the name of your app's executable
+            $artifactFileName = "waveterm.exe"
             $artifactFilePath = "$downloadFolder/$artifactFileName"
             Write-Host "Starting the artifact download process..."
             # Create the download directory if it doesn't exist
@@ -120,9 +118,9 @@ jobs:
                 exit 1
             }
             # Optional: If the app executable is different from the installer, find and launch it
-            $appPath = Join-Path $env:USERPROFILE "AppData\Local\Programs\yourapp\yourapp.exe"  # Adjust this path to your app's executable
-            Write-Host "Launching the application: $($appPath)"
-            Start-Process -FilePath $appPath
+            $wavePath = Join-Path $env:USERPROFILE "AppData\Local\Programs\waveterm\Wave.exe"
+            Write-Host "Launching the application: $($wavePath)"
+            Start-Process -FilePath $wavePath
             Write-Host "Application launched."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
