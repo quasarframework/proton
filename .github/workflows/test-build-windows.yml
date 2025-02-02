@@ -21,21 +21,17 @@ jobs:
           node-version: 20
           cache: 'pnpm'
           architecture: x64
+      - name: Enable Corepack and ensure pnpm is available
+        run: |
+          corepack enable
+          corepack prepare pnpm@latest --activate
+          pnpm --version  # Ensure pnpm is available
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: x86_64-pc-windows-msvc
-      - name: Clear corepack cache
-        run: |
-          npm cache clean --force
-          corepack disable
-          echo "Corepack cache cleared."
-      - name: Install pnpm
-        run: |
-          npm install -g pnpm@8.15.4
-          echo "pnpm installed successfully"
       - name: Install dependencies
-        run: pnpm i --frozen-lockfile --ignore-scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Build CLI
         run: pnpm run build:cli
         shell: bash
