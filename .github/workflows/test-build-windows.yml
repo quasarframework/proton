@@ -17,25 +17,45 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+
       - run: corepack enable
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
           architecture: x64
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: x86_64-pc-windows-msvc
+
+      - name: Install Visual Studio Build Tools
+        run: |
+          choco install visualstudio2019buildtools
+
       - name: Install dependencies
         run: |
           cd examples/api
-          pnpm i --frozen-lockfile --ignore-scripts
+          pnpm i --frozen-lockfile
+
+      - name: Install Tauri CLI
+        run: |
+          cd examples/api
+          pnpm add @tauri-apps/cli
+
+      - name: Verify Tauri CLI installation
+        run: |
+          cd examples/api
+          pnpm tauri --version
+
       - name: Build API Example App
         run: |
           cd examples/api
           pnpm tauri build
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -66,6 +86,7 @@ jobs:
         with:
           name: tauri-app
           path: ${{ runner.temp }}/tauri-app
+
       - name: Launch Application
         shell: pwsh
         run: |
@@ -117,3 +138,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FORCE_COLOR: "3"
+
