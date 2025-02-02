@@ -84,19 +84,12 @@ jobs:
 
             # Fetch the artifact upload URL (no need for GITHUB_RUN_ID)
             Write-Host "Fetching the artifact upload URL..."
-            try {
-                $artifactResponse = Invoke-RestMethod -Uri "https://api.github.com/repos/$env:GITHUB_REPOSITORY/actions/artifacts" -Headers $headers
-                Write-Host "Artifact API response: $($artifactResponse | ConvertTo-Json -Depth 3)"  # Print the full API response for debugging
-                
-                if ($artifactResponse.artifacts.Count -gt 0) {
-                    $artifactUrl = $artifactResponse.artifacts[0].archive_download_url
-                    Write-Host "Artifact URL successfully fetched: $artifactUrl"
-                } else {
-                    Write-Error "No artifacts found for this workflow run."
-                    exit 1
-                }
-            } catch {
-                Write-Error "Failed to fetch the artifact URL: $_"
+            $artifactUrl = (Invoke-RestMethod -Uri "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" -Headers $headers).artifacts[0].archive_download_url
+            
+            if ($artifactUrl) {
+                Write-Host "Artifact URL successfully fetched: $artifactUrl"
+            } else {
+                Write-Error "Failed to fetch the artifact URL."
                 exit 1
             }
 
