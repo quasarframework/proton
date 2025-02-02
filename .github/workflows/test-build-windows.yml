@@ -1,140 +1,123 @@
-name: Build and Test EXE for TestDriver
+# Copyright 2019-2024 Tauri Programme within The Commons Conservancy
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: MIT
 
+name: Build EXE for TestDriver
 env:
   DEBUG: napi:*
 
 on:
-  push:
-    branches: ["main"]
   pull_request:
-  workflow_dispatch:
-  schedule:
-    - cron: '0 */6 * * *'
 
 jobs:
   build:
-    name: Build Windows EXE
+    name: build windows
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-
       - run: corepack enable
-
-      - name: Setup Node.js
+      - name: Setup node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
           architecture: x64
-
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: x86_64-pc-windows-msvc
-
-      - name: Install Visual Studio Build Tools
-        run: |
-          choco install visualstudio2019buildtools
-
       - name: Install dependencies
-        run: |
-          cd examples/api
-          pnpm i --frozen-lockfile
-
-      - name: Install Tauri CLI
-        run: |
-          cd examples/api
-          pnpm add @tauri-apps/cli
-
-      - name: Verify Tauri CLI installation
-        run: |
-          cd examples/api
-          pnpm tauri --version
-
+        run: pnpm i --frozen-lockfile --ignore-scripts
+      - name: Build CLI
+        run: pnpm run build:cli
+        shell: bash
+      - name: Build AIP
+        run: pnpm run build:api
+        shell: bash
       - name: Build API Example App
         run: |
           cd examples/api
           pnpm tauri build
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: tauri-app
-          path: examples/api/src-tauri/target/release/app.exe
+          name: bindings-x86_64-pc-windows-msvc
+          path: target\release\bundle\nsis\*
           if-no-files-found: error
-
-  testdriver_matrix:
-    name: "TestDriver Matrix"
-    needs: build
-    runs-on: windows-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        test:
-          - name: "Call Log API testdriver"
-            file: "testdriver/comm_call_log_api.yml"
-          - name: "Call Request API testdriver"
-            file: "testdriver/comm_call_request_api.yml"
-          - name: "Echo testdriver"
-            file: "testdriver/comm_echo.yml"
-          - name: "Send Event to Rust testdriver"
-            file: "testdriver/comm_send_event_rust.yml"
-          - name: "Spam testdriver"
-            file: "testdriver/comm_spam.yml"
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: tauri-app
-          path: ${{ runner.temp }}/tauri-app
-
-      - name: Launch Application
-        shell: pwsh
-        run: |
-          $headers = @{
-              Authorization = "token ${{ secrets.GITHUB_TOKEN }}"
-          }
-          $downloadFolder = "$env:TEMP\download"
-          $artifactFileName = "app.exe"
-          $artifactFilePath = "$downloadFolder\$artifactFileName"
-          Write-Host "Starting the artifact download process..."
-          if (-not (Test-Path -Path $downloadFolder)) {
-              mkdir $downloadFolder
-          }
-          Write-Host "Fetching the artifact upload URL..."
-          $artifactResponse = Invoke-RestMethod -Uri "https://api.github.com/repos/${{ github.repository }}/actions/artifacts" -Headers $headers
-          if ($artifactResponse.artifacts.Count -gt 0) {
-              $artifactUrl = $artifactResponse.artifacts[0].archive_download_url
-              Write-Host "Artifact URL: $artifactUrl"
-          } else {
-              Write-Error "No artifacts found."
-              exit 1
-          }
-          $artifactZipPath = "$env:TEMP\artifact.zip"
-          try {
-              Invoke-WebRequest -Uri $artifactUrl -Headers $headers -OutFile $artifactZipPath -MaximumRedirection 5
-              Write-Host "Artifact downloaded successfully."
-          } catch {
-              Write-Error "Error downloading artifact: $_"
-              exit 1
-          }
-          $artifactUnzipPath = "$env:TEMP\artifact"
-          Expand-Archive -Path $artifactZipPath -DestinationPath $artifactUnzipPath -Force
-          $artifactInstallerPath = Get-ChildItem -Path $artifactUnzipPath -Filter app.exe -Recurse | Select-Object -First 1
-          if ($artifactInstallerPath) {
-              Write-Host "Executable found: $($artifactInstallerPath.FullName)"
-              Start-Process -FilePath $artifactInstallerPath.FullName
-          } else {
-              Write-Error "Executable not found."
-              exit 1
-          }
-          Write-Host "Application launched."
-
-      - name: Run TestDriver Tests
-        uses: testdriverai/action@main
+      - uses: testdriverai/action@main
         with:
           key: ${{ secrets.TESTDRIVER_API_KEY }}
-          prompt: |
-            1. /run ${{ matrix.test.file }}
+          prompt: | 
+            1. click around the desktop app 
+          prerun: |
+            $headers = @{
+                Authorization = "token ${{ secrets.GITHUB_TOKEN }}"
+            }
+            $downloadFolder = "./download"
+            $artifactFileName = "waveterm.exe"
+            $artifactFilePath = "$downloadFolder/$artifactFileName"
+            Write-Host "Starting the artifact download process..."
+            # Create the download directory if it doesn't exist
+            if (-not (Test-Path -Path $downloadFolder)) {
+                Write-Host "Creating download folder..."
+                mkdir $downloadFolder
+            } else {
+                Write-Host "Download folder already exists."
+            }
+            # Fetch the artifact upload URL
+            Write-Host "Fetching the artifact upload URL..."
+            $artifactUrl = (Invoke-RestMethod -Uri "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}/artifacts" -Headers $headers).artifacts[0].archive_download_url
+            if ($artifactUrl) {
+                Write-Host "Artifact URL successfully fetched: $artifactUrl"
+            } else {
+                Write-Error "Failed to fetch the artifact URL."
+                exit 1
+            }
+            # Download the artifact (zipped file)
+            Write-Host "Starting artifact download..."
+            $artifactZipPath = "$env:TEMP\artifact.zip"
+            try {
+                Invoke-WebRequest -Uri $artifactUrl `
+                    -Headers $headers `
+                    -OutFile $artifactZipPath `
+                    -MaximumRedirection 5
+                Write-Host "Artifact downloaded successfully to $artifactZipPath"
+            } catch {
+                Write-Error "Error downloading artifact: $_"
+                exit 1
+            }
+            # Unzip the artifact
+            $artifactUnzipPath = "$env:TEMP\artifact"
+            Write-Host "Unzipping the artifact to $artifactUnzipPath..."
+            try {
+                Expand-Archive -Path $artifactZipPath -DestinationPath $artifactUnzipPath -Force
+                Write-Host "Artifact unzipped successfully to $artifactUnzipPath"
+            } catch {
+                Write-Error "Failed to unzip the artifact: $_"
+                exit 1
+            }
+            # Find the installer or app executable
+            $artifactInstallerPath = Get-ChildItem -Path $artifactUnzipPath -Filter *.exe -Recurse | Select-Object -First 1
+            if ($artifactInstallerPath) {
+                Write-Host "Executable file found: $($artifactInstallerPath.FullName)"
+            } else {
+                Write-Error "Executable file not found. Exiting."
+                exit 1
+            }
+            # Run the installer and log the result
+            Write-Host "Running the installer: $($artifactInstallerPath.FullName)..."
+            try {
+                Start-Process -FilePath $artifactInstallerPath.FullName -Wait
+                Write-Host "Installer ran successfully."
+            } catch {
+                Write-Error "Failed to run the installer: $_"
+                exit 1
+            }
+            # Optional: If the app executable is different from the installer, find and launch it
+            $wavePath = Join-Path $env:USERPROFILE "AppData\Local\Programs\waveterm\Wave.exe"
+            Write-Host "Launching the application: $($wavePath)"
+            Start-Process -FilePath $wavePath
+            Write-Host "Application launched."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FORCE_COLOR: "3"
