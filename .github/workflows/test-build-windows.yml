@@ -15,18 +15,16 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install pnpm explicitly
+        run: |
+          npm install -g pnpm
+          pnpm --version  # Verify pnpm is installed and available
       - name: Setup node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
           architecture: x64
-      - name: Install pnpm globally
-        run: npm install -g pnpm
-      - name: Verify pnpm installation
-        run: |
-          pnpm --version
-          where pnpm
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
