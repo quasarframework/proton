@@ -34,6 +34,7 @@ jobs:
           pnpm install --prod --frozen-lockfile --ignore-scripts
       - name: Install Tauri CLI
         run: |
+          cd examples/api
           pnpm add @tauri-apps/cli -D
       - name: Build API Example App
         run: |
