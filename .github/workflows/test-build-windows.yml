@@ -64,75 +64,92 @@ jobs:
         with:
           key: ${{ secrets.TESTDRIVER_API_KEY }}
           prompt: | 
-            1. Click around the desktop app and verify functionality.
+            1. click around the desktop app 
           prerun: |
             $headers = @{
                 Authorization = "token ${{ secrets.GITHUB_TOKEN }}"
             }
+
+            $downloadFolder = "./download"
             $artifactName = "bindings-x86_64-pc-windows-msvc"
-            $downloadFolder = "$env:TEMP\artifact"
-            $artifactZipPath = "$env:TEMP\artifact.zip"
+            Write-Host "Starting the artifact download process..."
 
-            Write-Host "Starting artifact download process..."
+            # Create the download directory if it doesn't exist
+            if (-not (Test-Path -Path $downloadFolder)) {
+                Write-Host "Creating download folder..."
+                mkdir $downloadFolder
+            } else {
+                Write-Host "Download folder already exists."
+            }
 
-            # Fetch artifact details
-            Write-Host "Fetching artifact URL..."
+            # Fetch the artifact upload URL (no need for GITHUB_RUN_ID)
+            Write-Host "Fetching the artifact upload URL..."
             try {
-                $artifactResponse = Invoke-RestMethod -Uri "https://api.github.com/repos/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID/artifacts" -Headers $headers
-                $artifact = $artifactResponse.artifacts | Where-Object { $_.name -eq $artifactName }
+                $artifactResponse = Invoke-RestMethod -Uri "https://api.github.com/repos/$env:GITHUB_REPOSITORY/actions/artifacts" -Headers $headers
+                Write-Host "Artifact API response: $($artifactResponse | ConvertTo-Json -Depth 3)"  # Print the full API response for debugging
                 
-                if (-not $artifact) {
-                    Write-Error "No artifact named $artifactName found!"
+                if ($artifactResponse.artifacts.Count -gt 0) {
+                    $artifactUrl = $artifactResponse.artifacts[0].archive_download_url
+                    Write-Host "Artifact URL successfully fetched: $artifactUrl"
+                } else {
+                    Write-Error "No artifacts found for this workflow run."
                     exit 1
                 }
-
-                $artifactUrl = $artifact.archive_download_url
-                Write-Host "Artifact URL: $artifactUrl"
             } catch {
-                Write-Error "Failed to fetch artifact URL: $_"
+                Write-Error "Failed to fetch the artifact URL: $_"
                 exit 1
             }
 
-            # Download the artifact
-            Write-Host "Downloading artifact..."
+            # Download the artifact (zipped file)
+            Write-Host "Starting artifact download..."
+            $artifactZipPath = "$env:TEMP\artifact.zip"
             try {
-                Invoke-WebRequest -Uri $artifactUrl -Headers $headers -OutFile $artifactZipPath
-                Write-Host "Artifact downloaded to $artifactZipPath"
+                Invoke-WebRequest -Uri $artifactUrl `
+                    -Headers $headers `
+                    -OutFile $artifactZipPath `
+                    -MaximumRedirection 5
+                Write-Host "Artifact downloaded successfully to $artifactZipPath"
             } catch {
                 Write-Error "Error downloading artifact: $_"
                 exit 1
             }
 
-            # Extract the artifact
-            Write-Host "Extracting artifact..."
+            # Unzip the artifact
+            $artifactUnzipPath = "$env:TEMP\artifact"
+            Write-Host "Unzipping the artifact to $artifactUnzipPath..."
             try {
-                Expand-Archive -Path $artifactZipPath -DestinationPath $downloadFolder -Force
-                Write-Host "Artifact extracted to $downloadFolder"
+                Expand-Archive -Path $artifactZipPath -DestinationPath $artifactUnzipPath -Force
+                Write-Host "Artifact unzipped successfully to $artifactUnzipPath"
             } catch {
-                Write-Error "Failed to extract artifact: $_"
+                Write-Error "Failed to unzip the artifact: $_"
                 exit 1
             }
 
-            # Locate the .exe file dynamically
-            Write-Host "Searching for an executable file..."
-            $exeFile = Get-ChildItem -Path $downloadFolder -Filter *.exe -Recurse | Select-Object -First 1
-            if (-not $exeFile) {
-                Write-Error "No .exe file found in artifact!"
+            # Find the installer or app executable
+            $artifactInstallerPath = Get-ChildItem -Path $artifactUnzipPath -Filter *.exe -Recurse | Select-Object -First 1
+            if ($artifactInstallerPath) {
+                Write-Host "Executable file found: $($artifactInstallerPath.FullName)"
+            } else {
+                Write-Error "Executable file not found. Exiting."
                 exit 1
             }
-            
-            Write-Host "Executable found: $($exeFile.FullName)"
 
-            # Run the executable
-            Write-Host "Launching the application..."
+            # Run the installer and log the result
+            Write-Host "Running the installer: $($artifactInstallerPath.FullName)..."
             try {
-                Start-Process -FilePath $exeFile.FullName
-                Write-Host "Application launched successfully."
+                Start-Process -FilePath $artifactInstallerPath.FullName -Wait
+                Write-Host "Installer ran successfully."
             } catch {
-                Write-Error "Failed to launch application: $_"
+                Write-Error "Failed to run the installer: $_"
                 exit 1
             }
 
+            # Optional: If the app executable is different from the installer, find and launch it
+            $wavePath = Join-Path $env:USERPROFILE "AppData\Local\Programs\waveterm\Wave.exe"
+            Write-Host "Launching the application: $($wavePath)"
+            Start-Process -FilePath $wavePath
+            Write-Host "Application launched."
+          
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FORCE_COLOR: "3"
