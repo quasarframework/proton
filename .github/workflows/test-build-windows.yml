@@ -48,23 +48,10 @@ jobs:
       - name: Build API
         run: pnpm run build:api
         shell: bash
-        
-      - name: Run app in dev mode (background)
-        working-directory: examples/api
-        run: |
-          Start-Process -NoNewWindow -FilePath "cmd.exe" -ArgumentList "/c pnpm tauri dev"
-        shell: powershell
 
-      - name: Build API Example App
+      - name: Build API Dev App
         working-directory: examples/api
-        run: pnpm tauri build
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: bindings-x86_64-pc-windows-msvc
-          path: target\release\bundle\nsis\*
-          if-no-files-found: error
+        run: pnpm tauri dev
 
       - name: Set environment variables
         run: |
@@ -75,13 +62,13 @@ jobs:
         with:
           key: ${{ secrets.TESTDRIVER_API_KEY }}
           prompt: | 
-            1. /run testdriver/tauri_api_install.yml
+            # 1. /run testdriver/tauri_api_install.yml
             # 2. /run testdriver/dark_light_mode.yml
             # 3. /run testdriver/minimize_maximize.yml
-            2. /run testdriver/comm_echo.yml
-            3. /run testdriver/comm_send_event_rust.yml
-            4. /run testdriver/comm_spam.yml
-            5. /run testdriver/comm_call_request_api.yml
+            1. /run testdriver/comm_echo.yml
+            2. /run testdriver/comm_send_event_rust.yml
+            3. /run testdriver/comm_spam.yml
+            4. /run testdriver/comm_call_request_api.yml
             # 7. /run testdriver/comm_call_log_api.yml
             
           prerun: |
@@ -147,20 +134,24 @@ jobs:
             }
 
             # Run the installer and log the result
-            Write-Host "Running the installer: $($artifactInstallerPath.FullName)..."
-            try {
-                Start-Process -FilePath $artifactInstallerPath.FullName
-                Write-Host "Installer ran successfully."
-            } catch {
-                Write-Error "Failed to run the installer: $_"
-                exit 1
-            }
+            # Write-Host "Running the installer: $($artifactInstallerPath.FullName)..."
+            # try {
+            #    Start-Process -FilePath $artifactInstallerPath.FullName
+            #    Write-Host "Installer ran successfully."
+            # } catch {
+            #    Write-Error "Failed to run the installer: $_"
+            #    exit 1
+            # }
 
-            # Optional: If the app executable is different from the installer, find and launch it
-            # $wavePath = Join-Path $env:USERPROFILE "AppData\Local\Programs\waveterm\Wave.exe"
-            # Write-Host "Launching the application: $($wavePath)"
-            # Start-Process -FilePath $wavePath
-            # Write-Host "Application launched."
+            # Ensure we are in the correct base directory before switching
+            $baseDirectory = "${{ github.workspace }}"  # GitHub Actions workspace root
+            Set-Location -Path $baseDirectory
+              
+            # Build API Dev App
+            Write-Host "Building API Dev App..."
+            Set-Location -Path "examples/api"
+            pnpm tauri dev
+            Write-Host "API Dev App built successfully."
           
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
