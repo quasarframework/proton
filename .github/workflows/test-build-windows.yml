@@ -65,13 +65,14 @@ jobs:
           key: ${{ secrets.TESTDRIVER_API_KEY }}
           prompt: | 
             1. /run testdriver/tauri_api_install.yml
-            2. /run testdriver/comm_call_request_api.yml
-            3. /run testdriver/comm_echo.yml
-            4. /run testdriver/comm_send_event_rust.yml
-            5. /run testdriver/comm_spam.yml
-            6. /run testdriver/dark_light_mode.yml
-            7. /run testdriver/minimize_maximize.yml
+            2. /run testdriver/dark_light_mode.yml
+            3. /run testdriver/minimize_maximize.yml
+            4. /run testdriver/comm_echo.yml
+            5. /run testdriver/comm_send_event_rust.yml
+            6. /run testdriver/comm_spam.yml
+            7. /run testdriver/comm_call_request_api.yml
             8. /run testdriver/comm_call_log_api.yml
+            
           prerun: |
             $headers = @{
                 Authorization = "token ${{ secrets.GITHUB_TOKEN }}"
