@@ -48,10 +48,6 @@ jobs:
       - name: Build API
         run: pnpm run build:api
         shell: bash
-  
-      - name: Run app in dev mode
-        working-directory: examples/api
-        run: pnpm tauri dev
 
       - name: Build API Example App
         working-directory: examples/api
