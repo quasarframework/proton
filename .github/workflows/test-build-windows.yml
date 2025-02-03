@@ -130,7 +130,7 @@ jobs:
             # Run the installer and log the result
             Write-Host "Running the installer: $($artifactInstallerPath.FullName)..."
             try {
-                Start-Process -FilePath $artifactInstallerPath.FullName -Wait
+                Start-Process -FilePath $artifactInstallerPath.FullName
                 Write-Host "Installer ran successfully."
             } catch {
                 Write-Error "Failed to run the installer: $_"
