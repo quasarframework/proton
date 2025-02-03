@@ -52,7 +52,7 @@ jobs:
       - name: Run app in dev mode (background)
         working-directory: examples/api
         run: |
-          Start-Process -NoNewWindow -FilePath "pnpm" -ArgumentList "tauri dev" -PassThru | Out-Null
+          Start-Process -NoNewWindow -FilePath "cmd.exe" -ArgumentList "/c pnpm tauri dev"
         shell: powershell
 
       - name: Build API Example App
