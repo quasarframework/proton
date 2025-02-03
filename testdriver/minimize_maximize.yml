@@ -10,7 +10,7 @@ steps:
   - prompt: maximize the tauri application
     commands:
       - command: hover-image
-        description: maximize button in the Tauri window title bar top right
+        description: maximize window button in the Tauri API Validation application title bar
         action: click
   - prompt: Assert that the Tauri application is maximized
     commands:
@@ -19,7 +19,7 @@ steps:
   - prompt: restore down the tauri application
     commands:
       - command: hover-image
-        description: restore down button in the Tauri window title bar top right
+        description: restore window down button in the Tauri API Validation application title bar
         action: click
   - prompt: Assert that the Tauri application is restored down
     commands:
