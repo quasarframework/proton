@@ -138,10 +138,10 @@ jobs:
             }
 
             # Optional: If the app executable is different from the installer, find and launch it
-            $wavePath = Join-Path $env:USERPROFILE "AppData\Local\Programs\waveterm\Wave.exe"
-            Write-Host "Launching the application: $($wavePath)"
-            Start-Process -FilePath $wavePath
-            Write-Host "Application launched."
+            # $wavePath = Join-Path $env:USERPROFILE "AppData\Local\Programs\waveterm\Wave.exe"
+            # Write-Host "Launching the application: $($wavePath)"
+            # Start-Process -FilePath $wavePath
+            # Write-Host "Application launched."
           
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
