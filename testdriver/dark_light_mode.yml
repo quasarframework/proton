@@ -16,7 +16,7 @@ steps:
   - prompt: Assert that the Tauri application is dark mode
     commands:
       - command: assert
-        expect: Tauri application is dark mode
+        expect: Tauri application says Switch to Light Mode
   - prompt: Click the light mode button
     commands:
       - command: hover-text
@@ -26,4 +26,4 @@ steps:
   - prompt: Assert that the Tauri application is light mode
     commands:
       - command: assert
-        expect: Tauri application is light mode
+        expect: Tauri application says Switch to Dark mode
