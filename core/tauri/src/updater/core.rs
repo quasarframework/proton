@@ -1104,8 +1104,6 @@ fn copy_files_and_run(
 // └── ...
 #[cfg(target_os = "macos")]
 fn copy_files_and_run(bytes: &[u8], extract_path: &Path) -> Result {
-  let mut extracted_files: Vec<PathBuf> = Vec::new();
-
   let archive = Cursor::new(bytes);
 
   // extract the buffer to the tmp_dir
