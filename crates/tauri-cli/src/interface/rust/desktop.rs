@@ -81,6 +81,8 @@ pub fn run_dev<F: Fn(Option<i32>, ExitReason) + Send + Sync + 'static>(
   let manually_killed_app = Arc::new(AtomicBool::default());
   let manually_killed_app_ = manually_killed_app.clone();
 
+  log::info!(action = "Running"; "DevCommand (`{} {}`)", &dev_cmd.get_program().to_string_lossy(), dev_cmd.get_args().map(|arg| arg.to_string_lossy()).fold(String::new(), |acc, arg| format!("{acc} {arg}")));
+
   let dev_child = match SharedChild::spawn(&mut dev_cmd) {
     Ok(c) => Ok(c),
     Err(e) if e.kind() == ErrorKind::NotFound => Err(anyhow::anyhow!(
@@ -156,7 +158,7 @@ pub fn build(
   let out_dir = app_settings.out_dir(&options)?;
   let bin_path = app_settings.app_binary_path(&options)?;
 
-  if !std::env::var("STATIC_VCRUNTIME").map_or(false, |v| v == "false") {
+  if !std::env::var("STATIC_VCRUNTIME").is_ok_and(|v| v == "false") {
     std::env::set_var("STATIC_VCRUNTIME", "true");
   }
 

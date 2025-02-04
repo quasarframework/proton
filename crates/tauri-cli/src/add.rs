@@ -58,7 +58,7 @@ pub fn run(options: Options) -> Result<()> {
   let plugin_snake_case = plugin.replace('-', "_");
   let crate_name = format!("tauri-plugin-{plugin}");
   let npm_name = if is_known {
-    format!("tauri-apps/plugin-{plugin}")
+    format!("@tauri-apps/plugin-{plugin}")
   } else {
     format!("tauri-plugin-{plugin}-api")
   };

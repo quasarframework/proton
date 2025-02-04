@@ -68,7 +68,7 @@ fn copy_binaries(
       .to_string_lossy()
       .replace(&format!("-{target_triple}"), "");
 
-    if package_name.map_or(false, |n| n == &file_name) {
+    if package_name == Some(&file_name) {
       return Err(anyhow::anyhow!(
         "Cannot define a sidecar with the same name as the Cargo package name `{}`. Please change the sidecar name in the filesystem and the Tauri configuration.",
         file_name
@@ -675,7 +675,7 @@ pub fn try_build(attributes: Attributes) -> Result<()> {
         }
       }
       "msvc" => {
-        if env::var("STATIC_VCRUNTIME").map_or(false, |v| v == "true") {
+        if env::var("STATIC_VCRUNTIME").is_ok_and(|v| v == "true") {
           static_vcruntime::build();
         }
       }

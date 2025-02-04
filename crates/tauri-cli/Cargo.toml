@@ -1,6 +1,6 @@
 [package]
 name = "tauri-cli"
-version = "2.2.2"
+version = "2.2.7"
 authors = ["Tauri Programme within The Commons Conservancy"]
 edition = "2021"
 rust-version = "1.77.2"
@@ -47,12 +47,12 @@ sublime_fuzzy = "0.7"
 clap_complete = "4"
 clap = { version = "4", features = ["derive", "env"] }
 anyhow = "1"
-tauri-bundler = { version = "2.2.0", default-features = false, path = "../tauri-bundler" }
+tauri-bundler = { version = "2.2.3", default-features = false, path = "../tauri-bundler" }
 colored = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
-notify = "7"
-notify-debouncer-full = "0.4"
+notify = "8"
+notify-debouncer-full = "0.5"
 shared_child = "1"
 duct = "0.13"
 toml_edit = { version = "0.22", features = ["serde"] }
@@ -75,7 +75,7 @@ handlebars = "6"
 include_dir = "0.7"
 minisign = "=0.7.3"
 base64 = "0.22"
-ureq = { version = "2", default-features = false, features = ["gzip"] }
+ureq = { version = "3", default-features = false, features = ["gzip"] }
 os_info = "3"
 semver = "1"
 regex = "1"
@@ -148,4 +148,4 @@ native-tls = [
   "ureq/native-tls",
 ]
 native-tls-vendored = ["native-tls", "tauri-bundler/native-tls-vendored"]
-rustls = ["tauri-bundler/rustls", "cargo-mobile2/rustls", "ureq/tls"]
+rustls = ["tauri-bundler/rustls", "cargo-mobile2/rustls", "ureq/rustls"]

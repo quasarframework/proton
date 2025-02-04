@@ -1,5 +1,39 @@
 # Changelog
 
+## \[2.2.5]
+
+### Bug Fixes
+
+- [`477e9c049`](https://www.github.com/tauri-apps/tauri/commit/477e9c0496ff75ef8ef7aedc5430c77e213cd740) ([#12514](https://www.github.com/tauri-apps/tauri/pull/12514) by [@FabianLars](https://www.github.com/tauri-apps/tauri/../../FabianLars)) Fixed an issue that caused iOS apps to panic when using an async function for `tauri::mobile_entry_point`.
+
+## \[2.2.4]
+
+### Bug Fixes
+
+- [`27096cdc0`](https://www.github.com/tauri-apps/tauri/commit/27096cdc05d89b61b2372b4e4a3018c87f240ab8) ([#12445](https://www.github.com/tauri-apps/tauri/pull/12445) by [@FabianLars](https://www.github.com/tauri-apps/tauri/../../FabianLars)) Fixed an issue that caused Tauri's CLI to enable tauri's `native-tls` feature even though it wasn't needed. Moved `reqwest` to a mobile-only dependency in `tauri` and enabled its `rustls-tls` feature flag.
+
+## \[2.2.3]
+
+### Bug Fixes
+
+- [`d2c8f0eb5`](https://www.github.com/tauri-apps/tauri/commit/d2c8f0eb5ce2a5ebacd857614b7c89bbd5c9dca4) ([#12424](https://www.github.com/tauri-apps/tauri/pull/12424) by [@mattyg](https://www.github.com/tauri-apps/tauri/../../mattyg)) Ensure that tauri's builtin initialization scripts and plugin initialization scripts are executed before any user-added initialization scripts in a webview.
+
+## \[2.2.2]
+
+### Bug Fixes
+
+- [`61e69db9e`](https://www.github.com/tauri-apps/tauri/commit/61e69db9e48f6a652ed3ecb05567c648c6e788d0) ([#12376](https://www.github.com/tauri-apps/tauri/pull/12376) by [@FabianLars](https://www.github.com/tauri-apps/tauri/../../FabianLars)) Widen `specta` version range to `^2.0.0-rc.16` again.
+
+## \[2.2.1]
+
+### Bug Fixes
+
+- [`cd1d026f9`](https://www.github.com/tauri-apps/tauri/commit/cd1d026f9799c26b04acb64f49e7ee0a8b193049) ([#11961](https://www.github.com/tauri-apps/tauri/pull/11961) by [@Legend-Master](https://www.github.com/tauri-apps/tauri/../../Legend-Master)) Fix tauri fails to build if the project path contains glob characters
+
+### Dependencies
+
+- Upgraded to `tauri-build@2.0.5`
+
 ## \[2.2.0]
 
 ### New Features

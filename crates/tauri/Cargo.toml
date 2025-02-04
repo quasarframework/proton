@@ -1,6 +1,6 @@
 [package]
 name = "tauri"
-version = "2.2.0"
+version = "2.2.5"
 description = "Make tiny, secure apps for all desktop platforms with Tauri"
 exclude = ["/test", "/.scripts", "CHANGELOG.md", "/target"]
 readme = "README.md"
@@ -66,13 +66,8 @@ tauri-runtime-wry = { version = "2.3.0", path = "../tauri-runtime-wry", optional
 getrandom = "0.2"
 serde_repr = "0.1"
 http = "1"
-dirs = "5"
+dirs = "6"
 percent-encoding = "2"
-reqwest = { version = "0.12", default-features = false, features = [
-  "json",
-  "stream",
-] }
-bytes = { version = "1", features = ["serde"] }
 raw-window-handle = { version = "0.6", features = ["std"] }
 glob = "0.3"
 urlpattern = "0.3"
@@ -85,21 +80,20 @@ tracing = { version = "0.1", optional = true }
 heck = "0.5"
 log = "0.4.21"
 dunce = "1"
-specta = { version = "^2.0.0-rc.20", optional = true, default-features = false, features = [
+specta = { version = "^2.0.0-rc.16", optional = true, default-features = false, features = [
   "function",
   "derive",
 ] }
-# TODO: remove when specta releases rc.21
-specta-util = { version = "^0.0.7", optional = true, default-features = false, features = [
-  "export",
-] }
-[target."cfg(any(target_os = \"linux\", target_os = \"dragonfly\", target_os = \"freebsd\", target_os = \"openbsd\", target_os = \"netbsd\", target_os = \"windows\", target_os = \"macos\"))".dependencies]
+
+# desktop
+[target.'cfg(any(target_os = "linux", target_os = "dragonfly", target_os = "freebsd", target_os = "openbsd", target_os = "netbsd", target_os = "windows", target_os = "macos"))'.dependencies]
 muda = { version = "0.15", default-features = false, features = ["serde"] }
 tray-icon = { version = "0.19", default-features = false, features = [
   "serde",
 ], optional = true }
 
-[target."cfg(any(target_os = \"linux\", target_os = \"dragonfly\", target_os = \"freebsd\", target_os = \"openbsd\", target_os = \"netbsd\"))".dependencies]
+# linux
+[target.'cfg(any(target_os = "linux", target_os = "dragonfly", target_os = "freebsd", target_os = "openbsd", target_os = "netbsd"))'.dependencies]
 gtk = { version = "0.18", features = ["v3_24"] }
 webkit2gtk = { version = "=2.0.1", features = ["v2_40"] }
 
@@ -108,8 +102,13 @@ webkit2gtk = { version = "=2.0.1", features = ["v2_40"] }
 embed_plist = "1.2"
 plist = "1"
 objc2 = "0.5"
-objc2-foundation = { version = "0.2", features = ["NSData", "NSThread"] }
-objc2-app-kit = { version = "0.2", features = [
+objc2-foundation = { version = "0.2", default-features = false, features = [
+  "std",
+  "NSData",
+  "NSThread",
+] }
+objc2-app-kit = { version = "0.2", default-features = false, features = [
+  "std",
   "NSApplication",
   "NSColor",
   "NSResponder",
@@ -119,15 +118,23 @@ objc2-app-kit = { version = "0.2", features = [
 ] }
 window-vibrancy = "0.5"
 
+# windows
 [target."cfg(windows)".dependencies]
 webview2-com = "0.34"
 window-vibrancy = "0.5"
+windows = { version = "0.58", features = ["Win32_Foundation"] }
 
-[target."cfg(windows)".dependencies.windows]
-version = "0.58"
-features = ["Win32_Foundation"]
+# mobile
+[target.'cfg(any(target_os = "android", all(target_vendor = "apple", not(target_os = "macos"))))'.dependencies]
+bytes = { version = "1", features = ["serde"] }
+reqwest = { version = "0.12", default-features = false, features = [
+  "json",
+  "stream",
+  "rustls-tls",
+] }
 
-[target."cfg(target_os = \"android\")".dependencies]
+# android
+[target.'cfg(target_os = "android")'.dependencies]
 jni = "0.21"
 
 # UIKit, i.e. iOS/tvOS/watchOS/visionOS
@@ -138,7 +145,7 @@ swift-rs = "1"
 [build-dependencies]
 glob = "0.3"
 heck = "0.5"
-tauri-build = { path = "../tauri-build/", default-features = false, version = "2.0.4" }
+tauri-build = { path = "../tauri-build/", default-features = false, version = "2.0.5" }
 tauri-utils = { path = "../tauri-utils/", version = "2.1.1", features = [
   "build",
 ] }
@@ -178,9 +185,11 @@ objc-exception = ["tauri-runtime-wry/objc-exception"]
 linux-libxdo = ["tray-icon/libxdo", "muda/libxdo"]
 isolation = ["tauri-utils/isolation", "tauri-macros/isolation", "uuid"]
 custom-protocol = ["tauri-macros/custom-protocol"]
+# TODO: Remove these flags in v3 and/or enable them by default behind a mobile flag https://github.com/tauri-apps/tauri/issues/12384
+# For now those feature flags keep enabling reqwest features in case some users depend on that by accident.
 native-tls = ["reqwest/native-tls"]
 native-tls-vendored = ["reqwest/native-tls-vendored"]
-rustls-tls = ["reqwest/rustls-tls"]
+rustls-tls = []
 devtools = ["tauri-runtime/devtools", "tauri-runtime-wry/devtools"]
 process-relaunch-dangerous-allow-symlink-macos = [
   "tauri-utils/process-relaunch-dangerous-allow-symlink-macos",
@@ -196,7 +205,7 @@ config-toml = ["tauri-macros/config-toml"]
 image-ico = ["image/ico"]
 image-png = ["image/png"]
 macos-proxy = ["tauri-runtime-wry/macos-proxy"]
-specta = ["dep:specta", "dep:specta-util"]
+specta = ["dep:specta"]
 
 [[example]]
 name = "commands"

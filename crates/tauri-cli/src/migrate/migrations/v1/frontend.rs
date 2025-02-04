@@ -143,7 +143,7 @@ fn migrate_imports<'a>(
 
   let has_partial_js = path
     .extension()
-    .map_or(false, |ext| ext == "vue" || ext == "svelte");
+    .is_some_and(|ext| ext == "vue" || ext == "svelte");
 
   let sources = if !has_partial_js {
     vec![(SourceType::from_path(path).unwrap(), js_source, 0i64)]
