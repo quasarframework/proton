@@ -2791,9 +2791,6 @@ impl<T: UserEvent> Runtime<T> for Wry<T> {
       .event_loop
       .run_return(|event, event_loop, control_flow| {
         *control_flow = ControlFlow::Wait;
-        if let Event::MainEventsCleared = &event {
-          *control_flow = ControlFlow::Exit;
-        }
 
         for p in plugins.lock().unwrap().iter_mut() {
           let prevent_default = p.on_event(
