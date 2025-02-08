@@ -1017,24 +1017,27 @@ impl RustAppSettings {
       .workspace
       .and_then(|v| v.package);
 
+    let version = config.version.clone().unwrap_or_else(|| {
+      cargo_package_settings
+        .version
+        .clone()
+        .expect("Cargo manifest must have the `package.version` field")
+        .resolve("version", || {
+          ws_package_settings
+            .as_ref()
+            .and_then(|p| p.version.clone())
+            .ok_or_else(|| anyhow::anyhow!("Couldn't inherit value for `version` from workspace"))
+        })
+        .expect("Cargo project does not have a version")
+    });
+
     let package_settings = PackageSettings {
       product_name: config
         .product_name
         .clone()
         .unwrap_or_else(|| cargo_package_settings.name.clone()),
-      version: config.version.clone().unwrap_or_else(|| {
-        cargo_package_settings
-          .version
-          .clone()
-          .expect("Cargo manifest must have the `package.version` field")
-          .resolve("version", || {
-            ws_package_settings
-              .as_ref()
-              .and_then(|p| p.version.clone())
-              .ok_or_else(|| anyhow::anyhow!("Couldn't inherit value for `version` from workspace"))
-          })
-          .expect("Cargo project does not have a version")
-      }),
+      version: version.clone(),
+      short_version: Self::extract_short_version(&version),
       description: cargo_package_settings
         .description
         .clone()
@@ -1117,6 +1120,15 @@ impl RustAppSettings {
       .target
       .as_deref()
       .or_else(|| self.cargo_config.build().target())
+  }
+
+  fn extract_short_version(version: &String) -> String {
+    let mut parts = version.split('.');
+    match (parts.next(), parts.next()) {
+        (Some(major), Some(minor)) => format!("{}.{}", major, minor), // Create a new version String
+        (Some(major), None) => major.to_string(), // Convert major to version String if no minor
+        _ => String::new(), // Handle empty input case
+    }
   }
 
   pub fn out_dir(&self, options: &Options) -> crate::Result<PathBuf> {
