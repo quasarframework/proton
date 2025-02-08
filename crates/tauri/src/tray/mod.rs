@@ -285,7 +285,7 @@ impl<R: Runtime> TrayIconBuilder<R> {
   }
 
   /// Set tray icon temp dir path. **Linux only**.
-  /// 
+  ///
   /// Not availabe with feature `linux-ksni`.
   ///
   /// On Linux, we need to write the icon to the disk and usually it will
@@ -543,7 +543,7 @@ impl<R: Runtime> TrayIcon<R> {
   }
 
   /// Sets the tray icon temp dir path. **Linux only**.
-  /// 
+  ///
   /// Not availabe with feature `linux-ksni`.
   ///
   /// On Linux, we need to write the icon to the disk and usually it will
