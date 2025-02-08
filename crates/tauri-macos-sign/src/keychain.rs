@@ -191,7 +191,7 @@ impl Keychain {
 
     println!("Signing {}", path.display());
 
-    let mut args = vec!["--force", "-s", &identity];
+    let mut args = vec!["--deep", "--force", "--timestamp", "-s", &identity];
 
     if hardened_runtime {
       args.push("--options");
