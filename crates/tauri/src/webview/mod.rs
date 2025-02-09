@@ -13,6 +13,7 @@ use http::HeaderMap;
 use serde::Serialize;
 use tauri_macros::default_runtime;
 pub use tauri_runtime::webview::PageLoadEvent;
+pub use tauri_runtime::Cookie;
 #[cfg(desktop)]
 use tauri_runtime::{
   dpi::{PhysicalPosition, PhysicalSize, Position, Size},
@@ -25,7 +26,6 @@ use tauri_runtime::{
 pub use tauri_utils::config::Color;
 use tauri_utils::config::{BackgroundThrottlingPolicy, WebviewUrl, WindowConfig};
 pub use url::Url;
-pub use tauri_runtime::Cookie;
 
 use crate::{
   app::{UriSchemeResponder, WebviewEvent},
@@ -1158,9 +1158,30 @@ impl<R: Runtime> Webview<R> {
     Ok(())
   }
 
-  /// Returns all cookies for a specified URL including HTTP-only and secure cookies.
+  /// Returns all cookies in the runtime's cookie store including HTTP-only and secure cookies.
+  ///
+  /// Note that cookies will only be returned for URLs with an http or https scheme.
+  /// Cookies set through javascript for local files
+  /// (such as those served from the tauri://) protocol are not currently supported.
   pub fn cookies_for_url(&self, url: Url) -> crate::Result<Vec<Cookie<'static>>> {
-    self.webview.dispatcher.cookies_for_url(url).map_err(Into::into)
+    self
+      .webview
+      .dispatcher
+      .cookies_for_url(url)
+      .map_err(Into::into)
+  }
+
+  /// Returns all cookies in the runtime's cookie store for all URLs including HTTP-only and secure cookies.
+  ///
+  /// Note that cookies will only be returned for URLs with an http or https scheme.
+  /// Cookies set through javascript for local files
+  /// (such as those served from the tauri://) protocol are not currently supported.
+  ///
+  /// ## Platform-specific
+  ///
+  /// - **Android**: Unsupported, always returns an empty [`Vec`].
+  pub fn cookies(&self) -> crate::Result<Vec<Cookie<'static>>> {
+    self.webview.dispatcher.cookies().map_err(Into::into)
   }
 
   /// Sets whether the webview should automatically grow and shrink its size and position when the parent window resizes.

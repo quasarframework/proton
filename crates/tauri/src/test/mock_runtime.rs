@@ -586,6 +586,10 @@ impl<T: UserEvent> WebviewDispatch<T> for MockWebviewDispatcher {
     Ok(())
   }
 
+  fn cookies(&self) -> Result<Vec<tauri_runtime::Cookie<'static>>> {
+    Ok(Vec::new())
+  }
+
   fn cookies_for_url(&self, url: Url) -> Result<Vec<tauri_runtime::Cookie<'static>>> {
     Ok(Vec::new())
   }

@@ -522,6 +522,9 @@ pub trait WebviewDispatch<T: UserEvent>: Debug + Clone + Send + Sync + Sized + '
   /// Get cookies for a particular url.
   fn cookies_for_url(&self, url: Url) -> Result<Vec<Cookie<'static>>>;
 
+  /// Return all cookies in the cookie store.
+  fn cookies(&self) -> Result<Vec<Cookie<'static>>>;
+
   /// Sets whether the webview should automatically grow and shrink its size and position when the parent window resizes.
   fn set_auto_resize(&self, auto_resize: bool) -> Result<()>;
 
