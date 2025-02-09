@@ -16,6 +16,7 @@ use http::Request;
 use raw_window_handle::{DisplayHandle, HasDisplayHandle, HasWindowHandle};
 
 use tauri_runtime::{
+  Cookie,
   dpi::{LogicalPosition, LogicalSize, PhysicalPosition, PhysicalSize, Position, Size},
   monitor::Monitor,
   webview::{DetachedWebview, DownloadEvent, PendingWebview, WebviewIpcHandler},
@@ -1299,6 +1300,7 @@ pub enum WebviewMessage {
   EvaluateScript(String),
   #[cfg(all(feature = "tracing", not(target_os = "android")))]
   EvaluateScript(String, Sender<()>, tracing::Span),
+  CookiesForUrl(Url, Sender<Result<Vec<tauri_runtime::Cookie<'static>>>>),
   WebviewEvent(WebviewEvent),
   SynthesizedWindowEvent(SynthesizedWindowEvent),
   Navigate(Url),
@@ -1547,6 +1549,22 @@ impl<T: UserEvent> WebviewDispatch<T> for WryWebviewDispatcher<T> {
 
     *current_window_id = window_id;
     Ok(())
+  }
+
+  fn cookies_for_url(&self, url: Url) -> Result<Vec<Cookie<'static>>> {
+    let current_window_id = self.window_id.lock().unwrap();
+    let (tx, rx) = channel();
+    send_user_message(
+      &self.context,
+      Message::Webview(
+        *current_window_id,
+        self.webview_id,
+        WebviewMessage::CookiesForUrl(url, tx)
+      )
+    )?;
+
+    let res = rx.recv().unwrap();
+    res
   }
 
   fn set_auto_resize(&self, auto_resize: bool) -> Result<()> {
@@ -3407,6 +3425,14 @@ fn handle_user_message<T: UserEvent>(
             )
             .unwrap();
           }
+
+          WebviewMessage::CookiesForUrl(url, tx) => {
+            let webview_cookies = webview.cookies_for_url(url.as_str()).map_err(|_| Error::FailedToSendMessage);
+            tx.send(
+              webview_cookies
+            ).unwrap();
+          }
+
           WebviewMessage::Bounds(tx) => {
             tx.send(
               webview

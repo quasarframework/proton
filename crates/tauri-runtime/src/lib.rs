@@ -43,6 +43,9 @@ use http::{
 /// UI scaling utilities.
 pub use dpi;
 
+/// Cookie extraction
+pub use cookie::Cookie;
+
 pub type WindowEventId = u32;
 pub type WebviewEventId = u32;
 
@@ -515,6 +518,9 @@ pub trait WebviewDispatch<T: UserEvent>: Debug + Clone + Send + Sync + Sized + '
 
   /// Moves the webview to the given window.
   fn reparent(&self, window_id: WindowId) -> Result<()>;
+
+  /// Get cookies for a particular url.
+  fn cookies_for_url(&self, url: Url) -> Result<Vec<Cookie<'static>>>;
 
   /// Sets whether the webview should automatically grow and shrink its size and position when the parent window resizes.
   fn set_auto_resize(&self, auto_resize: bool) -> Result<()>;

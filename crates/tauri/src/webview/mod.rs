@@ -25,6 +25,7 @@ use tauri_runtime::{
 pub use tauri_utils::config::Color;
 use tauri_utils::config::{BackgroundThrottlingPolicy, WebviewUrl, WindowConfig};
 pub use url::Url;
+pub use tauri_runtime::Cookie;
 
 use crate::{
   app::{UriSchemeResponder, WebviewEvent},
@@ -1155,6 +1156,11 @@ impl<R: Runtime> Webview<R> {
     *self.window.lock().unwrap() = window.clone();
     self.webview.dispatcher.reparent(window.window.id)?;
     Ok(())
+  }
+
+  /// Returns all cookies for a specified URL including HTTP-only and secure cookies.
+  pub fn cookies_for_url(&self, url: Url) -> crate::Result<Vec<Cookie<'static>>> {
+    self.webview.dispatcher.cookies_for_url(url).map_err(Into::into)
   }
 
   /// Sets whether the webview should automatically grow and shrink its size and position when the parent window resizes.
