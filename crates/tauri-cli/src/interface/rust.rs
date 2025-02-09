@@ -1125,9 +1125,9 @@ impl RustAppSettings {
   fn extract_short_version(version: &str) -> String {
     let mut parts = version.split('.');
     match (parts.next(), parts.next()) {
-        (Some(major), Some(minor)) => format!("{}.{}", major, minor), // Create a new version String
-        (Some(major), None) => major.to_string(), // Convert major to version String if no minor
-        _ => String::new(), // Handle empty input case
+      (Some(major), Some(minor)) => format!("{}.{}", major, minor), // Create a new version String
+      (Some(major), None) => major.to_string(), // Convert major to version String if no minor
+      _ => String::new(),                       // Handle empty input case
     }
   }
 

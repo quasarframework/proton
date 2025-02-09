@@ -220,10 +220,7 @@ fn create_info_plist(
     "CFBundleShortVersionString".into(),
     settings.short_version_string().into(),
   );
-  plist.insert(
-    "CFBundleVersion".into(), 
-    settings.version_string().into(),
-  );
+  plist.insert("CFBundleVersion".into(), settings.version_string().into());
   plist.insert("CSResourcesFileMapped".into(), true.into());
   if let Some(category) = settings.app_category() {
     plist.insert(

@@ -177,8 +177,14 @@ pub fn command(options: Options, noise_level: NoiseLevel) -> Result<()> {
 
   let mut plist = plist::Dictionary::new();
   let version = interface.app_settings().get_package_settings().version;
-  let short_version = interface.app_settings().get_package_settings().short_version;
-  plist.insert("CFBundleShortVersionString".into(), short_version.clone().into());
+  let short_version = interface
+    .app_settings()
+    .get_package_settings()
+    .short_version;
+  plist.insert(
+    "CFBundleShortVersionString".into(),
+    short_version.clone().into(),
+  );
   plist.insert("CFBundleVersion".into(), version.into());
 
   let info_plist_path = config
