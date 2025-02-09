@@ -70,7 +70,7 @@ tauri-utils-v1 = { version = "1", package = "tauri-utils", features = [
   "config-toml",
 ] }
 toml = "0.8"
-jsonschema = "0.28"
+jsonschema = "0.29"
 handlebars = "6"
 include_dir = "0.7"
 minisign = "=0.7.3"
