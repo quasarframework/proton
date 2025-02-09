@@ -1122,7 +1122,7 @@ impl RustAppSettings {
       .or_else(|| self.cargo_config.build().target())
   }
 
-  fn extract_short_version(version: &String) -> String {
+  fn extract_short_version(version: &str) -> String {
     let mut parts = version.split('.');
     match (parts.next(), parts.next()) {
         (Some(major), Some(minor)) => format!("{}.{}", major, minor), // Create a new version String
