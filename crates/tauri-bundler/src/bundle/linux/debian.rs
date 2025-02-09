@@ -55,7 +55,12 @@ pub fn bundle_project(settings: &Settings) -> crate::Result<Vec<PathBuf>> {
   };
   let package_base_name = format!(
     "{}_{}_{}",
-    settings.product_name(),
+    &settings
+      .deb()
+      .package_name
+      .as_ref()
+      .cloned()
+      .unwrap_or_else(|| settings.product_name().to_string()),
     settings.version_string(),
     arch
   );
@@ -138,7 +143,12 @@ pub fn generate_data(
 fn generate_changelog_file(settings: &Settings, data_dir: &Path) -> crate::Result<()> {
   if let Some(changelog_src_path) = &settings.deb().changelog {
     let mut src_file = File::open(changelog_src_path)?;
-    let product_name = settings.product_name();
+    let product_name = &settings
+      .deb()
+      .package_name
+      .as_ref()
+      .cloned()
+      .unwrap_or_else(|| settings.product_name().to_string());
     let dest_path = data_dir.join(format!("usr/share/doc/{product_name}/changelog.gz"));
 
     let changelog_file = fs_utils::create_file(&dest_path)?;
@@ -162,7 +172,12 @@ fn generate_control_file(
   // https://www.debian.org/doc/debian-policy/ch-controlfields.html
   let dest_path = control_dir.join("control");
   let mut file = fs_utils::create_file(&dest_path)?;
-  let package = heck::AsKebabCase(settings.product_name());
+  let package = &settings
+    .deb()
+    .package_name
+    .as_ref()
+    .cloned()
+    .unwrap_or_else(|| heck::AsKebabCase(settings.product_name()).to_string());
   writeln!(file, "Package: {}", package)?;
   writeln!(file, "Version: {}", settings.version_string())?;
   writeln!(file, "Architecture: {arch}")?;
@@ -320,7 +335,14 @@ fn generate_md5sums(control_dir: &Path, data_dir: &Path) -> crate::Result<()> {
 /// Copy the bundle's resource files into an appropriate directory under the
 /// `data_dir`.
 fn copy_resource_files(settings: &Settings, data_dir: &Path) -> crate::Result<()> {
-  let resource_dir = data_dir.join("usr/lib").join(settings.product_name());
+  let resource_dir = data_dir.join("usr/lib").join(
+    settings
+      .deb()
+      .package_name
+      .as_ref()
+      .cloned()
+      .unwrap_or_else(|| settings.product_name().to_string()),
+  );
   settings.copy_resources(&resource_dir)
 }
 

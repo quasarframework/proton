@@ -171,6 +171,8 @@ pub struct UpdaterSettings {
 #[derive(Clone, Debug, Default)]
 pub struct DebianSettings {
   // OS-specific settings:
+  /// override the debian package name.
+  pub package_name: Option<String>,
   /// the list of debian dependencies.
   pub depends: Option<Vec<String>>,
   /// the list of debian dependencies recommendations.
@@ -229,6 +231,8 @@ pub struct AppImageSettings {
 /// The RPM bundle settings.
 #[derive(Clone, Debug, Default)]
 pub struct RpmSettings {
+  /// Override the RPM package name.
+  pub package_name: Option<String>,
   /// The list of RPM dependencies your application relies on.
   pub depends: Option<Vec<String>>,
   /// the list of of RPM dependencies your application recommends.
