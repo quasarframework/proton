@@ -33,6 +33,7 @@ use tauri_macros::default_runtime;
 use tauri_runtime::EventLoopProxy;
 use tauri_runtime::{
   dpi::{PhysicalPosition, PhysicalSize},
+  keyboard::KeyboardEvent,
   window::DragDropEvent,
   RuntimeInitArgs,
 };
@@ -115,6 +116,8 @@ pub enum WindowEvent {
   ///
   /// The parameter is true if the window has gained focus, and false if it has lost focus.
   Focused(bool),
+  /// An event from the keyboard has been received.
+  KeyboardInput(KeyboardEvent),
   /// The window's scale factor has changed.
   ///
   /// The following user actions can cause DPI changes:
@@ -151,6 +154,7 @@ impl From<RuntimeWindowEvent> for WindowEvent {
       },
       RuntimeWindowEvent::Destroyed => Self::Destroyed,
       RuntimeWindowEvent::Focused(flag) => Self::Focused(flag),
+      RuntimeWindowEvent::KeyboardInput { event } => Self::KeyboardInput(event),
       RuntimeWindowEvent::ScaleFactorChanged {
         scale_factor,
         new_inner_size,
