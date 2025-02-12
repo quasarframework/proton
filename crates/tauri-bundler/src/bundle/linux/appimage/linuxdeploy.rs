@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // SPDX-License-Identifier: MIT
 
-use super::debian;
+use super::{super::debian, write_and_make_executable};
 use crate::{
   bundle::settings::Arch,
   utils::{fs_utils, http_utils::download, CommandExt},
@@ -253,13 +253,4 @@ fn prepare_tools(tools_path: &Path, arch: &str) -> crate::Result<PathBuf> {
     .output();
 
   Ok(linuxdeploy)
-}
-
-fn write_and_make_executable(path: &Path, data: Vec<u8>) -> std::io::Result<()> {
-  use std::os::unix::fs::PermissionsExt;
-
-  fs::write(path, data)?;
-  fs::set_permissions(path, fs::Permissions::from_mode(0o770))?;
-
-  Ok(())
 }
