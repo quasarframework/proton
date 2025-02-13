@@ -191,12 +191,6 @@ fn create_info_plist(
   bundle_icon_file: Option<PathBuf>,
   settings: &Settings,
 ) -> crate::Result<()> {
-  let format = time::format_description::parse("[year][month][day].[hour][minute][second]")
-    .map_err(time::error::Error::from)?;
-  let build_number = time::OffsetDateTime::now_utc()
-    .format(&format)
-    .map_err(time::error::Error::from)?;
-
   let mut plist = plist::Dictionary::new();
   plist.insert("CFBundleDevelopmentRegion".into(), "English".into());
   plist.insert("CFBundleDisplayName".into(), settings.product_name().into());
@@ -224,9 +218,9 @@ fn create_info_plist(
   plist.insert("CFBundlePackageType".into(), "APPL".into());
   plist.insert(
     "CFBundleShortVersionString".into(),
-    settings.version_string().into(),
+    settings.short_version_string().into(),
   );
-  plist.insert("CFBundleVersion".into(), build_number.into());
+  plist.insert("CFBundleVersion".into(), settings.version_string().into());
   plist.insert("CSResourcesFileMapped".into(), true.into());
   if let Some(category) = settings.app_category() {
     plist.insert(

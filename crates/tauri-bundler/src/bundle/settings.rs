@@ -146,6 +146,8 @@ pub struct PackageSettings {
   pub product_name: String,
   /// the package's version.
   pub version: String,
+  /// the package's short version.
+  pub short_version: String,
   /// the package's description.
   pub description: String,
   /// the package's homepage.
@@ -1087,6 +1089,11 @@ impl Settings {
   /// Returns the version string of the bundle.
   pub fn version_string(&self) -> &str {
     &self.package.version
+  }
+
+  /// Returns the short version string of the bundle.
+  pub fn short_version_string(&self) -> &str {
+    &self.package.short_version
   }
 
   /// Returns the copyright text.

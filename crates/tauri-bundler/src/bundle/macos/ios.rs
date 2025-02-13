@@ -183,7 +183,7 @@ fn generate_info_plist(
   writeln!(
     file,
     "  <key>CFBundleShortVersionString</key>\n  <string>{}</string>",
-    settings.version_string()
+    settings.short_version_string()
   )?;
   writeln!(
     file,
