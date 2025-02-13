@@ -1092,6 +1092,47 @@ impl<R: Runtime> App<R> {
     });
   }
 
+  /// Runs the application, returning the exit code to use.
+  ///
+  /// # Examples
+  /// ```,no_run
+  /// let app = tauri::Builder::default()
+  ///   // on an actual app, remove the string argument
+  ///   .build(tauri::generate_context!("test/fixture/src-tauri/tauri.conf.json"))
+  ///   .expect("error while building tauri application");
+  /// let exit_code = app
+  ///   .run_return(|_app_handle, event| match event {
+  ///     tauri::RunEvent::ExitRequested { api, .. } => {
+  ///      api.prevent_exit();
+  ///     }
+  ///      _ => {}
+  ///   })
+  ///   .unwrap();
+  ///
+  /// std::process::exit(exit_code);
+  /// ```
+  #[cfg(desktop)]
+  pub fn run_return<F: FnMut(&AppHandle<R>, RunEvent) + 'static>(
+    mut self,
+    mut callback: F,
+  ) -> std::result::Result<i32, Box<dyn std::error::Error>> {
+    let manager = self.manager.clone();
+    let app_handle = self.handle().clone();
+
+    if !self.ran_setup {
+      setup(&mut self)?;
+    }
+
+    let exit_code = self.runtime.take().unwrap().run_return(move |event| {
+      let event = on_event_loop_event(&app_handle, event, &manager);
+      callback(&app_handle, event);
+    });
+
+    self.cleanup_before_exit();
+
+    Ok(exit_code)
+  }
+
   /// Runs an iteration of the runtime event loop and immediately return.
   ///
   /// Note that when using this API, app cleanup is not automatically done.
@@ -1115,6 +1156,9 @@ impl<R: Runtime> App<R> {
   /// }
   /// ```
   #[cfg(desktop)]
+  #[deprecated(
+    note = "When called in a loop (as suggested by the name), this function will busy-loop. To re-gain control of control flow after the app has exited, use `App::run_return` instead."
+  )]
   pub fn run_iteration<F: FnMut(&AppHandle<R>, RunEvent) + 'static>(&mut self, mut callback: F) {
     let manager = self.manager.clone();
     let app_handle = self.handle().clone();
