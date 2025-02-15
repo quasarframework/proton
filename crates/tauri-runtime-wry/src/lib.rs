@@ -23,9 +23,9 @@ use tauri_runtime::{
     CursorIcon, DetachedWindow, DetachedWindowWebview, DragDropEvent, PendingWindow, RawWindow,
     WebviewEvent, WindowBuilder, WindowBuilderBase, WindowEvent, WindowId, WindowSizeConstraints,
   },
-  DeviceEventFilter, Error, EventLoopProxy, ExitRequestedEventAction, Icon, ProgressBarState,
-  ProgressBarStatus, Result, RunEvent, Runtime, RuntimeHandle, RuntimeInitArgs, UserAttentionType,
-  UserEvent, WebviewDispatch, WebviewEventId, WindowDispatch, WindowEventId,
+  Cookie, DeviceEventFilter, Error, EventLoopProxy, ExitRequestedEventAction, Icon,
+  ProgressBarState, ProgressBarStatus, Result, RunEvent, Runtime, RuntimeHandle, RuntimeInitArgs,
+  UserAttentionType, UserEvent, WebviewDispatch, WebviewEventId, WindowDispatch, WindowEventId,
 };
 
 #[cfg(any(target_os = "macos", target_os = "ios"))]
@@ -1299,6 +1299,8 @@ pub enum WebviewMessage {
   EvaluateScript(String),
   #[cfg(all(feature = "tracing", not(target_os = "android")))]
   EvaluateScript(String, Sender<()>, tracing::Span),
+  CookiesForUrl(Url, Sender<Result<Vec<tauri_runtime::Cookie<'static>>>>),
+  Cookies(Sender<Result<Vec<tauri_runtime::Cookie<'static>>>>),
   WebviewEvent(WebviewEvent),
   SynthesizedWindowEvent(SynthesizedWindowEvent),
   Navigate(Url),
@@ -1547,6 +1549,25 @@ impl<T: UserEvent> WebviewDispatch<T> for WryWebviewDispatcher<T> {
 
     *current_window_id = window_id;
     Ok(())
+  }
+
+  fn cookies_for_url(&self, url: Url) -> Result<Vec<Cookie<'static>>> {
+    let current_window_id = self.window_id.lock().unwrap();
+    let (tx, rx) = channel();
+    send_user_message(
+      &self.context,
+      Message::Webview(
+        *current_window_id,
+        self.webview_id,
+        WebviewMessage::CookiesForUrl(url, tx),
+      ),
+    )?;
+
+    rx.recv().unwrap()
+  }
+
+  fn cookies(&self) -> Result<Vec<Cookie<'static>>> {
+    webview_getter!(self, WebviewMessage::Cookies)?
   }
 
   fn set_auto_resize(&self, auto_resize: bool) -> Result<()> {
@@ -3407,6 +3428,19 @@ fn handle_user_message<T: UserEvent>(
             )
             .unwrap();
           }
+
+          WebviewMessage::Cookies(tx) => {
+            tx.send(webview.cookies().map_err(|_| Error::FailedToSendMessage))
+              .unwrap();
+          }
+
+          WebviewMessage::CookiesForUrl(url, tx) => {
+            let webview_cookies = webview
+              .cookies_for_url(url.as_str())
+              .map_err(|_| Error::FailedToSendMessage);
+            tx.send(webview_cookies).unwrap();
+          }
+
           WebviewMessage::Bounds(tx) => {
             tx.send(
               webview

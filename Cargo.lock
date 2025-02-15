@@ -9391,6 +9391,7 @@ dependencies = [
 name = "tauri-runtime"
 version = "2.3.0"
 dependencies = [
+ "cookie",
  "dpi",
  "gtk",
  "http 1.2.0",
