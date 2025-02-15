@@ -55,6 +55,13 @@ const NSIS_REQUIRED_FILES: &[&str] = &[
   "Include/nsDialogs.nsh",
   "Include/WinMessages.nsh",
 ];
+const NSIS_PLUGIN_FILES: &[&str] = &[
+  "NSISdl.dll",
+  "StartMenu.dll",
+  "System.dll",
+  "nsDialogs.dll",
+  "nsis_tauri_utils.dll",
+];
 #[cfg(not(target_os = "windows"))]
 const NSIS_REQUIRED_FILES: &[&str] = &["Plugins/x86-unicode/nsis_tauri_utils.dll"];
 
@@ -524,6 +531,14 @@ fn build_nsis_app_installer(
     package_base_name
   ));
   fs::create_dir_all(nsis_installer_path.parent().unwrap())?;
+
+  if settings.can_sign() {
+    log::info!("Signing NSIS plugins");
+    for dll in NSIS_PLUGIN_FILES {
+      let path = _nsis_toolset_path.join("Plugins/x86-unicode").join(dll);
+      try_sign(&path, settings)?;
+    }
+  }
 
   log::info!(action = "Running"; "makensis.exe to produce {}", display_path(&nsis_installer_path));
 
