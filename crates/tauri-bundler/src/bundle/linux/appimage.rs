@@ -25,6 +25,7 @@ pub fn bundle_project(settings: &Settings) -> crate::Result<Vec<PathBuf>> {
     Arch::X86 => "i386",
     Arch::AArch64 => "aarch64",
     Arch::Armhf => "armhf",
+    Arch::Riscv64 => "riscv64",
     target => {
       return Err(crate::Error::ArchError(format!(
         "Unsupported architecture: {:?}",
@@ -131,6 +132,7 @@ pub fn bundle_project(settings: &Settings) -> crate::Result<Vec<PathBuf>> {
       Arch::X86 => "/usr/lib/i386-linux-gnu/",
       Arch::AArch64 => "/usr/lib/aarch64-linux-gnu/",
       Arch::Armhf => "/usr/lib/arm-linux-gnueabihf/",
+      Arch::Riscv64 => "/usr/lib/riscv64-linux-gnu/",
       _ => unreachable!(),
     },
     "/usr/lib64",
